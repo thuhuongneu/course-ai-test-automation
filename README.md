@@ -1,6 +1,6 @@
 # MSI Login Automation
 
-Playwright + TypeScript automation framework for the MSI login flow
+Playwright + TypeScript automation framework on the MSI login flow
 (`https://msi.dev.connectpos.com/login`).
 
 ## Structure
