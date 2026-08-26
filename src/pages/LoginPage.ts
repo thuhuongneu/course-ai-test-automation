@@ -20,7 +20,8 @@ export class LoginPage {
   }
 
   async goto(): Promise<void> {
-    await this.page.goto('/login');
+    await this.page.goto('/login', { waitUntil: 'domcontentloaded' });
+    await this.usernameInput.waitFor({ state: 'visible' });
   }
 
   async fillUsername(username: string): Promise<void> {
