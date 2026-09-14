@@ -1,0 +1,10 @@
+{
+  "browser": {
+    "launchOptions": {
+      "args": [
+        "--test-type",
+        "--window-position=0,0"
+      ]
+    }
+  }
+}

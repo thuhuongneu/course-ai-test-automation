@@ -1,0 +1,52 @@
+name: Playwright Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+env:
+  # Số luồng song song — hạ xuống 2–3 nếu runner 2 vCPU chạy chập chờn.
+  # Sửa đúng dòng này, KHÔNG đụng playwright.config.ts
+  WORKERS: 5
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: crm-playwright-automation
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: crm-playwright-automation/package-lock.json
+
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npx playwright install --with-deps chromium
+
+      - name: Chạy test
+        env:
+          BASE_URL: ${{ secrets.BASE_URL }}
+          TEST_USERNAME: ${{ secrets.TEST_USERNAME }}
+          TEST_PASSWORD: ${{ secrets.TEST_PASSWORD }}
+          HEADLESS: 'true'
+        run: npx playwright test
+
+      - name: Sinh Allure report
+        if: always()
+        # CLI Allure nằm trong devDependencies — CI không cài Allure riêng
+        run: npx allure generate reports/allure-results
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-reports
+          path: crm-playwright-automation/reports/
+          retention-days: 14

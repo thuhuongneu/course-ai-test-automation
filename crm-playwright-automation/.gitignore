@@ -1,0 +1,22 @@
+# Dependencies
+node_modules/
+
+# Test output - gom het trong reports/
+reports/
+
+# Thu muc mac dinh cua tool (phong khi config bi bo sot)
+allure-results/
+allure-report/
+test-results/
+playwright-report/
+.allure/
+
+# Credentials
+.env
+.env.local
+
+# IDE / OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<!--
+  KHONG chay song song: automation desktop dieu khien chuot/ban phim that va
+  doi hoi app o foreground. Hai test chay cung luc se giam chan nhau.
+-->
+<suite name="JIM POS Desktop Suite" verbose="1">
+  <test name="JIM POS Login Tests">
+    <classes>
+      <class name="com.jim.pos.tests.LoginTest"/>
+    </classes>
+  </test>
+</suite>
