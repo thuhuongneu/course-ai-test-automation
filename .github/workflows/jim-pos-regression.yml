@@ -1,0 +1,76 @@
+name: JIM POS Desktop Regression
+
+# Chay tren SELF-HOSTED runner (may Windows that), KHONG chay duoc tren runner cua GitHub:
+# test dieu khien chuot/ban phim that va doi hoi app ConnectPOS o foreground, nen can mot
+# phien desktop dang mo khoa. Huong dan cai runner: jim-app-automation/CI-SETUP.md
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'jim-app-automation/**'
+      - '.github/workflows/jim-pos-regression.yml'
+  pull_request:
+    paths:
+      - 'jim-app-automation/**'
+  workflow_dispatch:
+
+# Chi mot lan chay tai mot thoi diem: hai job cung luc se giam chan nhau vi dung chung
+# chuot/ban phim that cua may runner.
+concurrency:
+  group: jim-pos-desktop
+  cancel-in-progress: false
+
+jobs:
+  regression:
+    runs-on: [self-hosted, windows, jim-pos]
+    timeout-minutes: 30
+
+    strategy:
+      # Moi test class chay trong MOT lan chay Maven rieng (JVM rieng, app khoi dong lai sach):
+      # chay chung ca hai class trong mot lan hien con chap chon vi trang thai app con sot lai
+      # giua cac class - xem phan "Han che da biet" trong CI-SETUP.md.
+      max-parallel: 1
+      fail-fast: false
+      matrix:
+        suite: [LoginTest, CreateOrderTest]
+
+    defaults:
+      run:
+        shell: pwsh
+        working-directory: jim-app-automation
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # ConfigReader doc credentials tu .env (file nay nam trong .gitignore nen khong co san
+      # sau khi checkout) - dung lai tu GitHub Secrets, va xoa o buoc cuoi.
+      - name: Tạo .env từ Secrets
+        env:
+          JIM_APP_PATH: ${{ secrets.JIM_APP_PATH }}
+          JIM_USERNAME: ${{ secrets.JIM_USERNAME }}
+          JIM_PASSWORD: ${{ secrets.JIM_PASSWORD }}
+        run: |
+          @(
+            "JIM_APP_PATH=$env:JIM_APP_PATH"
+            "JIM_USERNAME=$env:JIM_USERNAME"
+            "JIM_PASSWORD=$env:JIM_PASSWORD"
+          ) | Set-Content -Path .env -Encoding utf8
+
+      # App con mo tu lan chay truoc se mang theo trang thai cu - dong han truoc khi bat dau.
+      - name: Đóng app còn sót từ lần chạy trước
+        run: taskkill /IM ConnectPOS.exe /F 2>$null; exit 0
+
+      # Maven Wrapper tu tai Maven ve - khong phu thuoc Maven cai san tren may runner.
+      - name: Chạy ${{ matrix.suite }}
+        run: .\mvnw.cmd -B test "-Dtest=${{ matrix.suite }}" -DfailIfNoSpecifiedTests=false
+
+      - name: Xoá .env
+        if: always()
+        run: Remove-Item .env -Force -ErrorAction SilentlyContinue
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-reports-${{ matrix.suite }}
+          path: jim-app-automation/reports/
+          retention-days: 14

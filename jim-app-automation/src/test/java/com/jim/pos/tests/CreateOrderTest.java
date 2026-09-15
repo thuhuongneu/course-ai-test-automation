@@ -128,14 +128,16 @@ public class CreateOrderTest extends BaseTest {
           "Màn hình bán hàng của terminal " + TERMINAL_NAME + " phải hiển thị sau khi chọn");
     });
 
-    // Act: tìm sản phẩm theo SKU (mô phỏng máy quét mã vạch) - tự động thêm vào giỏ
+    // Act: tìm sản phẩm theo SKU (mô phỏng máy quét mã vạch) - tự động thêm vào giỏ.
+    // KHONG retry buoc nay: moi lan quet lai la mot lan them hang nua vao gio, khong phai mot
+    // lan thu lai vo hai. Quet MOT lan roi cho gio cap nhat.
     Allure.step("Act: tìm sản phẩm theo SKU " + PRODUCT_SKU + " và thêm vào giỏ", () -> {
       stabilize();
-      boolean addedToCart = retryStep(
-          () -> terminalScreen.searchAndAddProduct(PRODUCT_SKU),
-          () -> terminalScreen.cartItemCount() == 1);
-      Assert.assertTrue(addedToCart,
-          "Giỏ hàng phải có đúng 1 sản phẩm sau khi tìm và quét SKU");
+      terminalScreen.searchAndAddProduct(PRODUCT_SKU);
+      Assert.assertTrue(terminalScreen.waitUntilCartNotEmpty(),
+          "Giỏ hàng phải có hàng sau khi quét SKU " + PRODUCT_SKU);
+      Assert.assertTrue(terminalScreen.cartContains(PRODUCT_SKU),
+          "Giỏ hàng phải chứa đúng sản phẩm vừa quét (SKU " + PRODUCT_SKU + ")");
     });
 
     // Act: bấm Pay, xác nhận Guest để chuyển sang Checkout

@@ -22,11 +22,14 @@ public class TerminalScreen {
 
   private static final String ROLE_TEXT = "TEXT";
   private static final String ROLE_BUTTON = "BUTTON";
+  private static final String ROLE_GROUPING = "GROUPING";
   private static final int SEARCH_BOX_INDEX = 0;
   private static final String PAY_BUTTON_PREFIX = "Pay";
   private static final String BTN_RECEIPT_LIST = "RECEIPT LIST";
   private static final int MENU_ICON_INDEX = 0;
   private static final Duration WAIT_TIMEOUT = Duration.ofSeconds(15);
+  private static final Duration CART_TIMEOUT = Duration.ofSeconds(10);
+  private static final long POLL_MILLIS = 300;
 
   private final AxDriver driver;
   private final UpdatePromptDialog updatePrompt;
@@ -65,7 +68,13 @@ public class TerminalScreen {
     driver.pressEnter();
   }
 
-  /** So luong item hien co trong gio hang, doc tu nut Pay ("Pay (N items) ..."). */
+  /**
+   * So luong item hien co trong gio hang, doc tu nut Pay ("Pay (N items) ...").
+   *
+   * <p>KHONG dung con so nay de khang dinh "da them dung mot san pham": cua hang demo co khuyen
+   * mai tu them voucher vao gio khi du dieu kien, nen so item khong chi phu thuoc vao so lan quet.
+   * Muon kiem chung san pham da vao gio thi dung {@link #cartContains(String)}.
+   */
   public int cartItemCount() {
     String payLabel = findPayButtonLabel();
     if (payLabel == null) {
@@ -74,6 +83,33 @@ public class TerminalScreen {
     // Dinh dang: "Pay\n (N items)\n..." - lay so ngay truoc chu "items".
     Matcher m = Pattern.compile("(\\d+)\\s*items?").matcher(payLabel);
     return m.find() ? Integer.parseInt(m.group(1)) : 0;
+  }
+
+  /**
+   * Cho toi khi gio hang khong con rong. PHAI cho thay vi doc ngay: nut Pay chi cap nhat so
+   * luong sau khi app xu ly xong lan quet, doc som se thay 0 va lam tang quyet dinh "quet lai" -
+   * moi lan quet lai la MOT LAN THEM HANG NUA vao gio.
+   */
+  public boolean waitUntilCartNotEmpty() {
+    long deadline = System.currentTimeMillis() + CART_TIMEOUT.toMillis();
+    while (System.currentTimeMillis() < deadline) {
+      updatePrompt.declineIfPresent();
+      if (cartItemCount() > 0) {
+        return true;
+      }
+      sleepQuiet(POLL_MILLIS);
+    }
+    return false;
+  }
+
+  /** Gio hang co dong nao chua {@code sku} khong - moi dong gio la mot khoi nhieu dong co SKU. */
+  public boolean cartContains(String sku) {
+    for (AxNode n : driver.findByRole(ROLE_GROUPING)) {
+      if (n.name != null && n.name.contains(sku)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   /** Bam nut Pay de sang man hinh Checkout. */

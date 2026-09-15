@@ -28,6 +28,8 @@ public class BaseTest {
   private static final String PROCESS_NAME = "ConnectPOS";
 
   private static final Duration APP_START_TIMEOUT = Duration.ofSeconds(60);
+  /** Thoi gian cho app dung xong giao dien sau khi tien trinh da chay - xem waitUntilUiReady(). */
+  private static final Duration UI_READY_TIMEOUT = Duration.ofSeconds(60);
   private static final long PROCESS_POLL_MILLIS = 1000;
 
   /**
@@ -211,12 +213,35 @@ public class BaseTest {
     while (System.currentTimeMillis() < deadline) {
       if (driver.isAppRunning()) {
         driver.focus();
+        waitUntilUiReady();
         return;
       }
       pollWait();
     }
     throw new IllegalStateException(
         "App khong khoi dong kip trong " + APP_START_TIMEOUT.getSeconds() + "s");
+  }
+
+  /**
+   * Cho den khi app dung xong giao dien, KHONG chi den khi tien trinh song.
+   *
+   * <p>Tien trinh bao "alive" gan nhu ngay lap tuc, nhung Flutter con mat vai giay nua moi dung
+   * xong man hinh dau tien - trong khoang do cay semantics RONG. Neu tra quyen dieu khien ngay
+   * luc do, moi thao tac tiep theo deu that bai tren mot cay rong ("khong tim thay element"),
+   * va {@link #goToLoginScreen()} se dot het so lan thu logout chi trong vai giay roi bao loi.
+   *
+   * <p>Het thoi gian cho thi KHONG nem loi: de buoc sau tu bao loi kem cay element thuc te, huu
+   * ich hon la mot loi timeout chung chung o day.
+   */
+  private void waitUntilUiReady() {
+    long deadline = System.currentTimeMillis() + UI_READY_TIMEOUT.toMillis();
+    while (System.currentTimeMillis() < deadline) {
+      updatePrompt.declineIfPresent();
+      if (loginScreen.isDisplayed() || selectRegisterScreen.hasLogoutButton()) {
+        return;
+      }
+      pollWait();
+    }
   }
 
   private void restartApp() {
