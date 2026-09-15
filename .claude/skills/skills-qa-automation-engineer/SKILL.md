@@ -90,26 +90,30 @@ Triggers when user asks:
 
 ---
 
-### Generate automation from UI steps
+### Generate automation from UI steps (chưa có TC)
 
-Use workflow: `generate-automation-from-ui-flow`
+Use workflow: `generate-automation-web` mode FLOW (web) · `generate-automation-mobile` mode FLOW (app mobile)
 
 Triggers when user asks:
 
 - automate this UI flow
 - generate automation from steps
 - run UI steps and generate Selenium script
+- mở app, đăng nhập, tạo đơn — viết Appium giùm
 
 ---
 
-### Generate API tests
+### Generate API test cases
 
-Use workflow: `generate-api-tests-from-swagger`
+Use workflow: `generate-testcases-api` (sinh TC) → `generate-automation-api` (sinh code từ TC)
 
 Triggers when user provides:
 
 - Swagger URL
 - OpenAPI specification
+- Scalar / Redoc URL, Postman collection
+
+> Module chưa có REQ API → chạy `generate-requirements-from-api` trước để TC có REQ neo vào. Có TC API rồi mới sinh code bằng `generate-automation-api` — không sinh code thẳng từ spec.
 
 ---
 
@@ -315,6 +319,29 @@ Triggers when user asks:
 - generate requirements from website
 - analyze website module and create requirements
 - extract user stories from web page
+
+---
+
+### Generate requirements from mobile app
+
+Use workflow: `generate-requirements-from-mobile`
+
+Triggers when user asks / provides:
+
+- generate requirements from mobile app, Android/iOS screen
+- file `.apk` / `.ipa`, package / bundle id kèm yêu cầu "phân tích", "sinh requirements"
+
+---
+
+### Generate requirements from API spec
+
+Use workflow: `generate-requirements-from-api`
+
+Triggers when user provides, **không kèm Ticket ID**:
+
+- Swagger UI / Scalar / Redoc URL, OpenAPI JSON/YAML
+- Postman collection
+- Tài liệu API dạng .docx / .pdf (bảng endpoint, JSON mẫu, bảng mã lỗi)
 
 ---
 
@@ -543,7 +570,8 @@ Skill này **không** kèm file hồ sơ dự án để user điền sẵn. Agen
 | Cần biết | Lấy ở đâu | Ghi vào đâu |
 |---|---|---|
 | **Hệ thống có những module nào** (chưa biết gì về hệ thống) | `/discover-system` — crawl navigation cấp hệ thống | `docs/requirements/_discovery/system_map.md` + `README.md` |
-| Module X làm gì, luồng nào, field nào | **Recon UI thực tế** qua Playwright MCP | `docs/requirements/<module>/requirements_<module>.md` |
+| Module X làm gì, luồng nào, field nào | **Recon UI thực tế** qua Playwright MCP — `/generate-requirements-from-website` (web) · qua Appium MCP — `/generate-requirements-from-mobile` (app) | `docs/requirements/<module>/requirements_<module>.md` |
+| Mặt API của module X — endpoint, schema, auth | `/discover-system` nhánh API → `/generate-requirements-from-api` (Swagger · Scalar · Postman · tài liệu API .docx) | `docs/requirements/<module>/api/requirements_<module>_api.md` + index — một nghiệp vụ một prefix, một thư mục module trên mọi nền tảng |
 | Prefix module, mã REQ/TC kế tiếp | Đọc danh mục hiện có | `docs/requirements/README.md` · `docs/testcases/README.md` |
 | Business rules ẩn, known issues (CAPTCHA, OTP…) | Gặp khi recon / chạy test → ghi lại ngay | Mục "Ghi chú" của tài liệu module + Nhật ký thay đổi |
 | URL, tài khoản test | **User cung cấp lúc chat** | `.env` (git-ignored) — KHÔNG ghi vào tài liệu |

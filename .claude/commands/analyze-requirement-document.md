@@ -28,7 +28,9 @@ Workflow này phân tích requirement documents (Jira tickets, .doc files, user 
 - User cần danh sách các điểm mơ hồ (ambiguities) để clarify với PO/BA
 - User nói: "phân tích requirement", "review yêu cầu", "analyze this ticket"
 
-> **KHÔNG dùng workflow này khi** nguồn sự thật là hệ thống đang chạy (không có tài liệu) → dùng `/generate-requirements-from-website`.
+> **KHÔNG dùng workflow này khi:**
+> - Nguồn sự thật là hệ thống đang chạy (không có tài liệu) → `/generate-requirements-from-website` (web) · `/generate-requirements-from-mobile` (app mobile)
+> - Đầu vào là **đặc tả API** — OpenAPI/Swagger/Scalar/Redoc, Postman collection, hoặc `.docx`/`.pdf` mô tả endpoint — mà **không** gắn với một ticket → `/generate-requirements-from-api`. Workflow đó không cần Ticket ID, và ghi vào `requirements_<module>.md` thay vì `analysis_<TICKET-ID>.md`
 
 ### ⛔ Bước 0 — Chốt chặn đầu vào (BẮT BUỘC, làm TRƯỚC mọi thứ khác)
 
@@ -39,10 +41,19 @@ Workflow này nhận **tài liệu nguồn** (ticket, spec, user story) và sinh
 | Dấu hiệu tệp là ĐẦU RA, không phải đầu vào | Thuộc workflow nào | Route đúng |
 |---|---|---|
 | Tên khớp `requirements_<module>.md`, hoặc có bảng `REQ ID`/`Dải mã đã dùng`/`Nhật ký thay đổi` | `/generate-requirements-from-website` | Cập nhật theo ticket → `/update-requirements-from-ticket` · Sinh TC → `/generate_testcases_*` |
-| Tên khớp `system_map.md` / `api_map.md`, hoặc nằm trong `_discovery/` | `/discover-system` | Recon chi tiết một module → `/generate-requirements-from-website` |
+| Tên khớp `system_map.md`, hoặc nằm trong `_discovery/` (trừ `sources/`) | `/discover-system` | Recon chi tiết một module → `/generate-requirements-from-website` (web) · `/generate-requirements-from-mobile` (app) |
+| Tên khớp `api_map.md` | `/discover-system` nhánh API · `/generate-testcases-api` | Sinh REQ cho module API → **`/generate-requirements-from-api`** · Sinh TC API → `/generate-testcases-api` |
 | Tên khớp `analysis_<TICKET-ID>.md`, `impact_<TICKET-ID>.md`, `test_cases_<module>.md` | chính workflow này hoặc tầng test case | Hỏi user muốn làm gì với nó |
 
-**Không xác định được ticket ID** từ tệp đầu vào cũng là dấu hiệu đủ để dừng — đầu ra bắt buộc đặt tên theo `analysis_<TICKET-ID>.md`, không có ID thì không đặt tên được.
+**Tệp là đặc tả API, không phải tài liệu ticket** — cũng dừng và route, dù không phải sản phẩm của workflow khác:
+
+| Dấu hiệu | Route đúng |
+|---|---|
+| JSON/YAML có khoá `openapi` / `swagger` + `paths` · JSON có `info._postman_id` hoặc `item[].request` · snapshot trong `_discovery/sources/` · URL Swagger UI / Scalar / Redoc | `/generate-requirements-from-api` |
+| `.docx`/`.pdf` mà phần chính là bảng method/path, JSON mẫu request/response, bảng mã lỗi — **không** có Ticket ID | `/generate-requirements-from-api` (skill 3.4.6) |
+| Ticket (có ID) mô tả thay đổi của **một** API | ✅ Chạy tiếp ở đây — đó đúng là tài liệu ticket |
+
+**Không xác định được ticket ID** từ tệp đầu vào cũng là dấu hiệu đủ để dừng — đầu ra bắt buộc đặt tên theo `analysis_<TICKET-ID>.md`, không có ID thì không đặt tên được. Trước khi dừng, kiểm bảng ngay trên: tệp không có ID vì là **đặc tả API** thì route sang `/generate-requirements-from-api`, không chỉ dừng suông.
 
 ❌ **Không "cố suy ra" một ticket ID** từ tên module hay ngày tháng để chạy tiếp. Dừng và hỏi.
 
@@ -339,3 +350,4 @@ Agent PHẢI xuất artifact theo cấu trúc sau:
 | Cần sinh test cases bài bản (RBT 6 bước) | `/generate-testcases-manual-rbt` |
 | Cần sinh automation scripts | `/generate-automation-from-testcases` |
 | Cần phân tích cross-module | `/generate-cross-module-test-plan` |
+| Ticket có đính kèm spec API (OpenAPI, Postman, file mô tả endpoint) | Phân tích ticket ở đây, **đặc tả đính kèm** chạy `/generate-requirements-from-api` để REQ của từng endpoint vào tài liệu module |

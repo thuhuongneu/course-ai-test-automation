@@ -39,7 +39,7 @@ skills:
    |-------|----------|---------|
    | User cung cấp trực tiếp | Đọc từ input | ⭐ Cao nhất |
    | DOM thực tế (UI form) | `browser_navigate` → `browser_snapshot` → phân tích input fields | ⭐ Cao |
-   | Swagger/OpenAPI spec | `WebFetch` → parse schema + constraints | ⭐ Cao |
+   | Swagger/OpenAPI spec | Đã có snapshot ở `_discovery/sources/` → `Read`. Chưa có → tải thô bằng `curl` theo skill `skills-requirements-analyzer` mục 3.4.1 (**không** `WebFetch` — spec lớn bị cắt âm thầm) → parse schema + constraints | ⭐ Cao |
    | Test cases đã có | Đọc test steps → trích xuất fields | Trung bình |
    | Đoán từ tên module | Dựa trên kinh nghiệm domain | ⭐ Thấp nhất |
 

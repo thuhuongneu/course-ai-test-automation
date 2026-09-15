@@ -1,6 +1,6 @@
 ---
 name: skills-rbt-manual-testing
-description: Skill sinh và cập nhật manual test cases với 4 modes — QUICK (sinh nhanh từ requirements), FULL RBT (quy trình AI-RBT 6 bước có đánh giá rủi ro), CHECKLIST (checklist rà soát ngắn để tick tay — smoke/regression/release) và DELTA (cập nhật bộ TC đã có theo Impact Report, giữ nguyên TC ID). Master skill cho mọi tác vụ manual test case.
+description: Skill sinh và cập nhật manual test cases với 4 modes — QUICK (sinh nhanh từ requirements), FULL RBT (quy trình AI-RBT 6 bước có đánh giá rủi ro), CHECKLIST (checklist rà soát ngắn để tick tay — smoke/regression/release) và DELTA (cập nhật bộ TC đã có theo Impact Report, giữ nguyên TC ID). Mọi mode sinh TC đều đi theo khung 4 vòng Smoke → Functional → Technical → Non-functional để không bỏ sót lớp kiểm thử nào. Master skill cho mọi tác vụ manual test case.
 ---
 
 # RBT Manual Testing
@@ -103,7 +103,7 @@ Bạn muốn làm gì với test cases?
 
 ## Quy Tắc Đối Chiếu Evidence (BẮT BUỘC — áp dụng cả 4 modes, chạy TRƯỚC batch đầu tiên)
 
-Tài liệu requirements là **mô tả bằng chữ**; ảnh trong `docs/requirements/<module>/evidence/` là **bằng chứng**. Sinh TC chỉ từ chữ dẫn tới bịa bố cục, nhãn, thứ tự tab, định dạng hiển thị — và không ai phát hiện được vì TC đọc vẫn rất thuyết phục.
+Tài liệu requirements là **mô tả bằng chữ**; ảnh trong `docs/requirements/<module>/<nền-tảng>/evidence/` là **bằng chứng**. Sinh TC chỉ từ chữ dẫn tới bịa bố cục, nhãn, thứ tự tab, định dạng hiển thị — và không ai phát hiện được vì TC đọc vẫn rất thuyết phục.
 
 **Thứ tự tin cậy khi ba nguồn mâu thuẫn:**
 
@@ -113,7 +113,7 @@ DOM thật (đọc trực tiếp) > Ảnh evidence > Tài liệu chữ
 
 ### 1. Mở toàn bộ evidence trước khi sinh TC
 
-- Liệt kê `docs/requirements/<module>/evidence/` rồi **mở TỪNG ảnh bằng `Read`**. Không được bỏ ảnh nào vì "tên file nghe không liên quan"
+- Liệt kê `docs/requirements/<module>/<nền-tảng>/evidence/` của **nền tảng đang sinh TC** (tài liệu cũ chưa có tầng nền tảng: `docs/requirements/<module>/evidence/`) rồi **mở TỪNG ảnh bằng `Read`**. Không được bỏ ảnh nào vì "tên file nghe không liên quan"
 - Ảnh của module liên quan (VD Projects tham chiếu Customers) cũng mở nếu TC chạm tới
 - **Chưa mở evidence thì chưa được ghi dòng TC đầu tiên**
 
@@ -269,37 +269,51 @@ Bộ TC thường dài 70–100+ dòng bảng. In toàn bộ ra chat khiến use
 
 ### 2. Cấu trúc thư mục & ngưỡng tách file
 
-**Test cases tổ chức theo thư mục từng module** (đối xứng với `docs/requirements/`):
+**Test cases tổ chức theo thư mục từng module, bên trong chia tầng nền tảng** (đối xứng với `docs/requirements/` — CLAUDE.md mục 6b):
 
 ```
 docs/testcases/
-├── README.md                                   ← DANH MỤC toàn hệ thống
+├── README.md                                        ← DANH MỤC toàn hệ thống
 └── <module>/
-    ├── test_cases_<module>.md                  ← INDEX — TÊN FILE BẤT BIẾN
-    ├── parts/part_NN_<slug>.md                 ← khi tách (>40 TC)
-    ├── impact/impact_plan_<TICKET-ID>.md       ← Mode DELTA: kế hoạch sửa theo từng ticket
-    └── archive/test_cases_<module>_vN.md       ← phiên bản cũ, giữ để truy vết
+    ├── test_cases_<module>.md                       ← INDEX — TÊN FILE BẤT BIẾN · KHÔNG chứa dòng TC
+    ├── web/test_cases_<module>_web.md               ← TC chạy trên web
+    ├── mobile/test_cases_<module>_mobile.md         ← TC chạy trên app — tag @Android / @iOS
+    ├── api/test_cases_<module>_api.md               ← TC gọi API
+    ├── <nền-tảng>/parts/part_NN_<nền-tảng>_<slug>.md ← khi file nền tảng vượt ngưỡng
+    ├── impact/impact_plan_<TICKET-ID>.md            ← Mode DELTA: kế hoạch sửa theo từng ticket (cấp module)
+    └── archive/test_cases_<module>_<nền-tảng>_vN.md ← phiên bản cũ, giữ để truy vết
 ```
+
+**Tầng nền tảng — luật cứng:**
+
+| Quy tắc | Lý do |
+|---|---|
+| Chỉ 3 thư mục `web/` · `mobile/` · `api/`; Android và iOS chung `mobile/`, phân biệt bằng tag `@Android` / `@iOS` | Thêm thư mục `android/`, `ios/` là tách đôi dải TC của cùng một màn hình |
+| **Luôn có tầng nền tảng**, kể cả module chỉ có một nền tảng | Thêm nền tảng thứ hai về sau không phải di chuyển file — di chuyển là gãy link từ execution report và bug |
+| Mỗi TC nằm ở **đúng một** file nền tảng — TC là thứ được **chạy**, và mỗi lần chạy thuộc một nền tảng | Không có "TC dùng chung"; REQ dùng chung thì mỗi nền tảng một TC, cùng `REQ ID` |
+| **Dải TC ID chung toàn module**, đánh tiếp qua mọi file nền tảng | `CRM_CUST_TC_041` là duy nhất trong module dù nằm ở `web/` hay `mobile/` — RTM và `testId` của automation không phải biết đường dẫn |
+| Tên file nền tảng **mang hậu tố nền tảng** (`test_cases_<module>_web.md`, `part_NN_web_<slug>.md`) | `scripts/testcases-viewer` phân biệt tài liệu theo **tên file** — hai file trùng tên thì file nạp sau ghi đè file trước |
+| Bộ TC cũ chưa có tầng nền tảng | Không di chuyển cho tới khi Mode DELTA / sinh thêm chạm lại module → chuyển **một lần** vào file nền tảng, TC ID giữ nguyên, bản cũ vào `archive/`, ghi Nhật ký |
 
 > ⚠️ **Dự án mới — BẮT BUỘC kiểm tra trước khi ghi bộ TC đầu tiên:** `docs/testcases/README.md` chưa tồn tại thì **tạo ngay** với bảng danh mục rỗng, rồi mới ghi TC và bổ sung dòng đầu tiên. Thiếu file này thì không ai biết prefix TC ID nào đã bị chiếm, và độ phủ REQ↔TC không có chỗ theo dõi.
 >
-> Nội dung file danh mục gồm 6 mục: bảng danh mục module (kèm **prefix TC ID đã chiếm**) · độ phủ so với requirements · cấu trúc thư mục chuẩn · kết quả thực thi (`docs/executions/`) · quy trình sử dụng · nhật ký danh mục.
+> Nội dung file danh mục gồm 6 mục: bảng danh mục module (kèm **prefix TC ID đã chiếm** và cột `Nền tảng` — số TC từng nền tảng, VD `Web 52 · Mobile 24 · API 18`) · độ phủ so với requirements · cấu trúc thư mục chuẩn · kết quả thực thi (`docs/executions/`) · quy trình sử dụng · nhật ký danh mục.
 
 | Quy tắc | Lý do |
 |---|---|
 | Tên index **luôn** `test_cases_<module>.md` | Mọi workflow phía sau (`/execute-test-cases`, `/review-testcases`, `/generate-automation-from-testcases`, `/generate-traceability-matrix`) đọc theo mẫu `docs/testcases/<module>/test_cases_<module>.md`. Đổi tên là vỡ chuỗi |
 | **KHÔNG** nhét số phiên bản vào tên index (`_v2`, `_new`…) | Phiên bản mới **thay thế** index; bản cũ chuyển vào `archive/` |
-| Part đặt trong `parts/`, đặt tên `part_NN_<slug>.md` | `NN` có số 0 đứng đầu để sắp xếp đúng; slug mô tả nhóm chức năng |
-| Mode DELTA sửa **tại chỗ** index/part, bản trước khi sửa copy vào `archive/` | Giữ đúng một nguồn sự thật. Sinh `_improved` / `_v2` ở ngoài `archive/` là để lại hai bộ TC mà không ai biết bộ nào đang dùng |
+| Part đặt trong `<nền-tảng>/parts/`, đặt tên `part_NN_<nền-tảng>_<slug>.md` | `NN` có số 0 đứng đầu để sắp xếp đúng; slug mô tả nhóm chức năng; hậu tố nền tảng chống trùng tên file |
+| Mode DELTA sửa **tại chỗ** file nền tảng/part, bản trước khi sửa copy vào `archive/` (tên kèm nền tảng) | Giữ đúng một nguồn sự thật. Sinh `_improved` / `_v2` ở ngoài `archive/` là để lại hai bộ TC mà không ai biết bộ nào đang dùng |
 
 **Ngưỡng tách:**
 
 | Điều kiện | Xử lý |
 |---|---|
-| ≤ 40 TC ở độ hạt TÁCH · ≤ 50 TC ở độ hạt GỘP | 1 file `test_cases_<module>.md`, không cần `parts/` |
-| Vượt ngưỡng trên | Tách vào `parts/part_01_<slug>.md`, `part_02_...` — mỗi part dưới ngưỡng, **cắt tại ranh giới nhóm chức năng**, không cắt giữa nhóm |
+| ≤ 40 TC ở độ hạt TÁCH · ≤ 50 TC ở độ hạt GỘP — **đếm theo từng nền tảng** | 1 file `<nền-tảng>/test_cases_<module>_<nền-tảng>.md`, không cần `parts/` |
+| File nền tảng vượt ngưỡng trên | Tách vào `<nền-tảng>/parts/part_01_<nền-tảng>_<slug>.md`, `part_02_...` — mỗi part dưới ngưỡng, **cắt tại ranh giới nhóm chức năng**, không cắt giữa nhóm |
 | Nhiều module | Mỗi module một thư mục riêng, KHÔNG gộp chung |
-| Có ≥2 part | File `test_cases_<module>.md` trở thành **index** (xem mục 4), TC chi tiết nằm hết trong `parts/` |
+| Mọi trường hợp | File `test_cases_<module>.md` **luôn là index** (xem mục 4) — TC chi tiết nằm hết trong file nền tảng / part |
 
 > Ngưỡng đếm theo **số TC**, không theo dung lượng — người review đọc lần lượt từng TC, nên số TC mới là thứ quyết định một lượt review có kham nổi không.
 >
@@ -307,40 +321,47 @@ docs/testcases/
 
 ### 3. Chạy theo batch — không dừng hỏi giữa chừng
 
-- Chia theo **nhóm chức năng** (validation form / data table / CRUD / phân quyền / status flow / non-functional), mỗi batch 15–25 TC
+- Chia theo **VÒNG** của [Bản Đồ Loại Kiểm Thử — 4 Vòng](#bản-đồ-loại-kiểm-thử--4-vòng-bắt-buộc--khung-sinh-tc-cho-quick--full-rbt--delta): `V1 Smoke` → `V2 Functional` → `V3 Technical` → `V4 Non-functional`. Mỗi batch 15–25 TC
+- Vòng 2 thường đông TC → chia con **bên trong vòng** theo nhóm chức năng (validation form / data table / CRUD / status flow). KHÔNG trộn TC của hai vòng khác nhau vào một batch
 - Agent **chạy thẳng hết mọi batch trong 1 lượt**, KHÔNG dừng hỏi "có tiếp tục không" sau mỗi batch
 - Trước khi sinh, agent công bố kế hoạch batch để user biết tổng khối lượng:
   ```
-  Kế hoạch: 4 batch · ~46 TC · 1 file · độ hạt GỘP (mặc định)
-  1. Validation form (≈14 TC)   2. Data table & filter (≈11 TC)
-  3. CRUD & phân quyền (≈13 TC) 4. Non-functional (≈8 TC)
+  Kế hoạch: 5 batch · ~46 TC · 1 file · độ hạt GỘP (mặc định)
+  V1 Smoke        (≈9 TC)   — UI cơ bản, mở form, hiển thị, nhập hợp lệ, lưu, đối chiếu
+  V2a Validation  (≈14 TC)  — required + 15 loại field
+  V2b CRUD & luồng(≈11 TC)  — sửa, xoá, phụ thuộc, đoán lỗi
+  V3 Technical    (≈8 TC)   — phân quyền, bảo mật cơ bản  [@TechCheck]
+  V4 Non-func     (≈4 TC)   — responsive, bàn phím
   ```
   Dòng kế hoạch **BẮT BUỘC** nêu độ hạt đang dùng — user đọc một dòng là biết sẽ nhận ~46 TC hay ~85 TC và chặn lại được ngay nếu không hợp ý.
 - Ngoại lệ được phép dừng: phát hiện requirement mâu thuẫn nghiêm trọng làm sai hàng loạt TC phía sau
 
-### 4. File index (khi có ≥2 part)
+### 4. File index (luôn có)
 
-File `docs/testcases/<module>/test_cases_<module>.md` **trở thành index** — giữ nguyên tên, không đổi thành `*_index.md`:
+File `docs/testcases/<module>/test_cases_<module>.md` **là index** — giữ nguyên tên, không đổi thành `*_index.md`, **không** chứa dòng TC:
 
 ```markdown
-# Test Cases — <Module> (tổng <N> TC · <M> part)
+# Test Cases — <Module> (tổng <N> TC · <K> nền tảng)
 
 | Thông tin | Nội dung |
 |---|---|
 | Nguồn requirement | [requirements_<module>.md](../../requirements/<module>/requirements_<module>.md) |
+| Dải TC ID đã dùng | `CRM_CUST_TC_001` → `CRM_CUST_TC_094` — chung mọi nền tảng |
 
 ## Bản đồ tài liệu
-| File | Nhóm chức năng | Số TC | TC ID range | REQ bao phủ |
-|---|---|---|---|---|
-| [Part 1](parts/part_01_danh_sach.md) | Danh sách, tìm kiếm, lọc | 36 | CRM_CUST_TC_001–036 | REQ-CUST-01 → 13 |
-| [Part 2](parts/part_02_tao_sua.md) | Tạo/sửa + validation | 40 | CRM_CUST_TC_037–076 | REQ-CUST-14 → 26 |
+| Nền tảng | File | Nhóm chức năng | Số TC | TC ID | REQ bao phủ |
+|---|---|---|---|---|---|
+| Web | [web/test_cases_customers_web.md](web/test_cases_customers_web.md) | Danh sách · tạo/sửa · validation | 52 | 001–052 | REQ-CUST-01 → 26 |
+| Mobile | [mobile/test_cases_customers_mobile.md](mobile/test_cases_customers_mobile.md) | Danh sách · tạo nhanh · quyền camera | 24 | 053–076 | REQ-CUST-01 → 08 · 27 → 33 |
+| API | [api/parts/part_01_api_customers.md](api/parts/part_01_api_customers.md) | `/api/customers` | 18 | 077–094 | REQ-CUST-01 · 34 → 45 |
 
 ## Bảng Đối Soát Coverage (toàn module)
-<gộp coverage của tất cả part — mọi REQ phải có ≥1 TC>
+<gộp coverage của mọi file nền tảng — có cột theo nền tảng: REQ khai áp N nền tảng thì phải có ≥ 1 TC ở **mỗi** nền tảng đó>
 ```
 
-- Mỗi part **BẮT BUỘC** có link ngược về index và link tới part liền kề
-- Bảng Đối Soát Coverage **chỉ nằm ở index**, không nhân bản vào từng part
+- Mỗi file nền tảng / part **BẮT BUỘC** có link ngược về index, link tới file requirements của **cùng nền tảng** (`../../../requirements/<module>/<nền-tảng>/requirements_<module>_<nền-tảng>.md`) và link tới part liền kề
+- Bảng Đối Soát Coverage **chỉ nằm ở index**, không nhân bản vào từng file nền tảng
+- REQ dùng chung ≥ 2 nền tảng mà thiếu TC ở một nền tảng đã khai → coverage của nền tảng đó là ❌, **không** được tính là "đã phủ" nhờ TC của nền tảng khác
 - **Cập nhật `docs/testcases/README.md`** (danh mục) sau khi sinh xong: số TC, số part, REQ bao phủ, ngày cập nhật
 
 ### 5. task.md — theo dõi tiến độ
@@ -424,6 +445,7 @@ Cùng một module, cùng một mức bao phủ, số TC có thể chênh nhau *
 - **Trần 6 biến thể / TC.** Vượt thì tách theo nhóm rủi ro — 12 dòng biến thể trong một ô bảng là không ai đọc nổi
 - **Bảng Đối Soát Coverage vẫn tính theo REQ**, không tính theo TC — mọi REQ trong phạm vi vẫn phải có ≥1 TC
 - Số TC giảm **không được** kéo theo giảm số **case** kiểm. Gộp là đổi cách trình bày; biến thể bị bỏ đi là **giảm độ phủ** — vi phạm Quality Gate
+- **Đếm và công bố số biến thể.** Bảng Đối soát loại kiểm thử ghi `<số TC> TC · <số biến thể>` ở mọi dòng ✅, và dòng tóm tắt cuối chat ghi tổng `<N> TC · <M> biến thể`. Không có con số này thì gộp trở thành cái cớ để rụng case mà không ai phát hiện — Bảng Đối Soát Coverage đếm theo REQ nên **không bắt được**
 
 ### Đổi độ hạt của bộ TC đã có
 
@@ -451,7 +473,7 @@ Sinh test cases **nhanh, đủ chất lượng** từ requirements/user stories 
 1. **Đọc và hiểu requirements** được cung cấp
    - Nếu requirements đã có mã REQ ID (từ `skills-requirements-analyzer`) → dùng nguyên mã đó
    - Nếu chưa có mã → agent tự gán `REQ-<MODULE>-<SỐ>` cho từng yêu cầu/rule trước khi sinh TC
-2. **Mở toàn bộ evidence** theo [Quy Tắc Đối Chiếu Evidence](#quy-tắc-đối-chiếu-evidence-bắt-buộc--áp-dụng-cả-3-modes-chạy-trước-batch-đầu-tiên) — liệt kê `docs/requirements/<module>/evidence/` và `Read` từng ảnh. **Chưa làm xong bước này thì chưa được ghi dòng TC đầu tiên.** Ghi lại ảnh nào cắt cụt / vùng nào không có ảnh để dùng ở bước 10
+2. **Mở toàn bộ evidence** theo [Quy Tắc Đối Chiếu Evidence](#quy-tắc-đối-chiếu-evidence-bắt-buộc--áp-dụng-cả-3-modes-chạy-trước-batch-đầu-tiên) — liệt kê `docs/requirements/<module>/<nền-tảng>/evidence/` và `Read` từng ảnh. **Chưa làm xong bước này thì chưa được ghi dòng TC đầu tiên.** Ghi lại ảnh nào cắt cụt / vùng nào không có ảnh để dùng ở bước 10
 3. **Ghi nhận Assumptions (BẮT BUỘC khi requirement mơ hồ):**
    - QUICK mode không dừng hỏi Q&A → mọi điểm không rõ agent phải **ghi rõ giả định** đã dùng
    - Xuất mục "Assumptions" ngay đầu output: `ASM-XX | Điểm chưa rõ | Giả định đã áp dụng | TC bị ảnh hưởng`
@@ -460,6 +482,10 @@ Sinh test cases **nhanh, đủ chất lượng** từ requirements/user stories 
    - Happy Path (luồng chính)
    - Negative Path (dữ liệu sai, thiếu)
    - Boundary Cases (giá trị biên)
+4b. **Lập kế hoạch theo 4 vòng (BẮT BUỘC — làm TRƯỚC khi ghi dòng TC đầu tiên):**
+   - Duyệt [Bản Đồ Loại Kiểm Thử — 4 Vòng](#bản-đồ-loại-kiểm-thử--4-vòng-bắt-buộc--khung-sinh-tc-cho-quick--full-rbt--delta), chấm sơ bộ từng nhánh `✅ sẽ sinh` / `➖ không áp dụng (lý do)`
+   - Sinh **tuần tự V1 → V2 → V3 → V4**, KHÔNG nhảy cóc. Vòng 1 luôn mở đầu bằng nhánh `UI cơ bản`
+   - Công bố kế hoạch batch theo vòng ra chat trước khi sinh
 5. **Áp dụng kỹ thuật thiết kế test case** theo Quy Tắc Bắt Buộc Áp Dụng Kỹ Thuật (xem section riêng):
    - **Equivalence Partitioning (EP):** Chia input thành nhóm tương đương
    - **Boundary Value Analysis (BVA):** Test giá trị tại ranh giới
@@ -478,7 +504,7 @@ Sinh test cases **nhanh, đủ chất lượng** từ requirements/user stories 
    - Keyboard Accessibility (A11y)
    - HTTP Status Codes (cho API TCs)
 9. **Xuất ra bảng Markdown** chuẩn có đầy đủ metadata cho Automation, sẵn sàng sync vào Google Sheets hoặc Jira/TestRail.
-10. **Chạy Self-Quality Gate (8 Tiêu chí):** Rà soát lại 100% test cases + đối soát coverage + đối soát evidence + **rà ngôn ngữ kiểm chứng** (tiêu chí 8) trước khi xuất kết quả.
+10. **Chạy Self-Quality Gate (11 Tiêu chí, 0–10):** Rà soát lại 100% test cases + đối soát coverage (6) + đối soát evidence (7) + **rà ngôn ngữ kiểm chứng** (8) + **rà đặc tính chất lượng ISO/IEC 25010** (9) + **đối soát loại kiểm thử 4 vòng** (10) trước khi xuất kết quả.
 
 ## Bảng Output Standard (chuẩn hóa đầy đủ Metadata)
 
@@ -492,6 +518,7 @@ Sinh test cases **nhanh, đủ chất lượng** từ requirements/user stories 
 > - **Automatable:** `Yes` / `No` / `Partial` (Độ khả thi để viết script tự động)
 > - **Auto Type:** `UI` / `API` / `Unit` / `N/A` (Loại automation phù hợp)
 > - **Tags:** `@Smoke`, `@Regression`, `@CriticalPath`, `@Security`, `@Boundary`
+> - **Tag nền tảng** — BẮT BUỘC khi module có ≥ 2 nền tảng (requirements có cột `Nền tảng`, skill `skills-requirements-analyzer` mục 2.2): mỗi TC gắn `@Web` · `@Android` · `@iOS` · `@API` theo nền tảng nó chạy. REQ `Nền tảng` = `Tất cả` mà các bước thao tác khác nhau giữa nền tảng → **mỗi nền tảng một TC**, cùng `REQ ID`, mỗi TC nằm ở file nền tảng của nó. Dùng **tag**, **không** thêm cột `Nền tảng` — viewer map cột theo tên, cột lạ bị bỏ qua. TC nằm ở file của **đúng** nền tảng nó chạy (`web/` · `mobile/` · `api/` — mục 2 của Quy Tắc Xuất File); chung prefix nên **chung dải TC ID** toàn module — ❌ không mở dải TC ID riêng cho mobile/API
 >
 > ⚠️ **Tên cột là hợp đồng đọc, không phải nhãn trình bày.** `scripts/testcases-viewer` map cột theo **tên**, nên thứ tự cột đổi được nhưng tên thì không: `TC ID`, `REQ ID`, `Module`, `Priority`, `Automatable`, `Tags` phải khớp **chính xác** (thêm chữ như `TC ID liên quan` là mất cột), còn `Risk`, `Scenario`/`Test Title`, `Pre-Condition`, `Test Steps`, `Test Data`, `Expected`, `Auto Type` khớp theo chuỗi con. **KHÔNG dịch tên cột sang Tiếng Việt** — nội dung ô viết Tiếng Việt, tên cột giữ nguyên.
 >
@@ -527,6 +554,208 @@ Sinh test cases **nhanh, đủ chất lượng** từ requirements/user stories 
 ✅ Đúng: "Nhập 256 ký tự vào trường Name (max: 255)"
 ```
 
+## Bản Đồ Loại Kiểm Thử — 4 Vòng (BẮT BUỘC — khung sinh TC cho QUICK · FULL RBT · DELTA)
+
+> Hai bảng checklist ngay bên dưới (Field-Level 15 loại · Component-Level) trả lời *"trường này / thành phần này phải test gì"*. Bảng này trả lời câu **khác hẳn**: ***"bộ TC đã đi qua đủ các LOẠI kiểm thử chưa, và theo thứ tự nào"*** — chống bỏ sót nguyên một lớp test. Lớp hay bị mất nhất: **giao diện ở Vòng 1**, vì phần validation vẫn đủ nên nhìn qua tưởng bộ TC đã kín.
+>
+> **Phân biệt với bảng ISO/IEC 25010 ở cuối skill:** 4 vòng là **khung tác nghiệp lúc sinh** — chia batch, đặt thứ tự, chấm thiếu-đủ theo nhánh. ISO 25010 là **khung rà soát lúc xuất** — đặc tính nào ngoài phạm vi, ai chịu trách nhiệm, nuôi mục 2.2 của Master Test Plan. Chạy **cả hai**, không cái nào thay được cái nào.
+
+### Thứ tự bắt buộc
+
+```
+VÒNG 1 – SMOKE            → màn hình dựng được, luồng sống còn không vỡ
+VÒNG 2 – FUNCTIONAL       → phần thân của mọi bộ TC (~60–70% số TC)
+VÒNG 3 – TECHNICAL        → phần lớn cần DevTools/DB → tag @TechCheck
+VÒNG 4 – NON-FUNCTIONAL   → phần lớn chấm ➖ ở app nghiệp vụ thường
+```
+
+Sinh **tuần tự V1 → V4**, không nhảy cóc. Lý do không phải hình thức: Vòng 1 fail thì **mọi TC Vòng 2 đều BLOCKED** — biết trong 10 phút đầu để dừng, thay vì chạy hết 40 TC rồi mới phát hiện form không mở được.
+
+---
+
+### VÒNG 1 — SMOKE
+
+| Nhánh | Kích hoạt khi | TC phải có | Trỏ về |
+|---|---|---|---|
+| **UI cơ bản** | **Luôn luôn** | Màn hình hiển thị **đủ** thành phần theo evidence: nhãn nguyên văn, thứ tự field, nút, liên kết, tiêu đề. Trạng thái mặc định từng ô (rỗng / tick sẵn / option đang chọn / con trỏ đang ở đâu) | Gộp **Kiểu B** · 4 nhóm evidence bắt buộc |
+| **Open form** | Có form / modal / trang con | Mở được bằng **mọi lối vào** (nút, menu, URL trực tiếp) · đóng được bằng X / Cancel / ESC / click ra ngoài | Component-Level → Modal/Dialog |
+| **Display** | Có dữ liệu hiển thị | Định dạng hiển thị đúng (tiền tệ, ngày, giờ, badge, avatar) · trạng thái rỗng · trạng thái đang tải | 4 nhóm evidence bắt buộc |
+| **Input valid data** | Có form nhập | Bộ dữ liệu hợp lệ **tối thiểu** (chỉ field bắt buộc) và bộ **đầy đủ** (mọi field) | Quy tắc Test Data |
+| **Save** | Có hành động lưu | Lưu thành công → thông báo đúng → điều hướng đúng | Component-Level → CRUD |
+| **Verify data** | Có lưu | Dữ liệu vừa lưu hiện đúng ở **danh sách** *và* ở **màn hình chi tiết** | Component-Level → CRUD |
+
+> 🚨 **Nhánh `UI cơ bản` là chỗ bị bỏ sót nhiều nhất.** Bộ TC không có TC nào kiểm nhãn / thứ tự / trạng thái mặc định của màn hình là **thiếu hẳn một lớp**, dù phần validation đầy đủ đến đâu. Nhánh này **KHÔNG BAO GIỜ** được chấm `➖`.
+
+---
+
+### VÒNG 2 — FUNCTIONAL
+
+| Nhánh | Kích hoạt khi | TC phải có | Trỏ về |
+|---|---|---|---|
+| **UI Behavior** | Có tương tác làm đổi giao diện | Field bật/tắt theo lựa chọn khác · nút khoá đến khi đủ điều kiện · bộ đếm ký tự · gợi ý autocomplete · nút hiện/ẩn mật khẩu | Quy Tắc Đối Chiếu Evidence mục 6 (disabled ≠ không tick) |
+| **Required** | Có field bắt buộc | Bỏ trống **TỪNG** field bắt buộc → thông báo trỏ đúng field đó · bỏ trống tất cả | Bảng Field-Level |
+| **Validation** | Mọi field có ràng buộc | Đối soát **đủ từng mục** của loại field tương ứng trong bảng 15 loại — mục bỏ qua phải ghi lý do | Bảng Field-Level |
+| **Equivalence Partitioning** | Field có miền giá trị phân nhóm được | Mỗi partition ≥1 TC | Quy Tắc Bắt Buộc Áp Dụng Kỹ Thuật |
+| **Boundary Value Analysis** | Field có min/max | `min-1` · `min` · `max` · `max+1` | nt |
+| **Business Rule** | Có quy tắc nghiệp vụ | Mỗi rule ≥1 TC tuân thủ + ≥1 TC vi phạm (verify bị chặn) | nt |
+| **Decision Table** | ≥3 điều kiện kết hợp → 1 output | Mỗi rule (cột) = 1 TC | nt |
+| **State Transition** | Entity có ≥3 trạng thái | Mọi transition hợp lệ + mọi transition **bị chặn** | nt · Component-Level → Status Flow |
+| **Dependency** | Field / màn hình phụ thuộc nhau | Đổi A → B đổi theo · xoá A đang được B tham chiếu · A rỗng thì B khoá | Component-Level → CRUD (khoá ngoại) |
+| **Use Case / Scenario** | Có luồng nghiệp vụ nhiều bước | Chuỗi end-to-end **trong phạm vi module** (tạo → sửa → đổi trạng thái → tìm lại) | — |
+| **Save / Edit / Delete** | Có CRUD | Toàn bộ CRUD Lifecycle, gồm huỷ giữa chừng và xoá bản ghi đang được liên kết | Component-Level → CRUD |
+| **Error Guessing** | **Luôn luôn** | Bấm Lưu hai lần liên tiếp · dán dữ liệu lạ · bấm Back sau khi lưu · nạp lại trang giữa chừng · mở 2 tab cùng sửa | Scenarios Chuyên Sâu |
+
+> `Positive` / `Negative` **KHÔNG phải nhánh riêng** — chúng là thuộc tính của mọi nhánh bên trên. Chấm ở mức bộ TC (Gate #4), **không** tạo batch riêng, **không** tạo dòng riêng trong bảng đối soát.
+
+---
+
+### VÒNG 3 — TECHNICAL
+
+> ⚠️ Đa số nhánh vòng này **không kiểm được bằng mắt** → nội dung phải nằm dưới `🔧 Ghi chú kỹ thuật (cần DevTools):` và TC mang tag `@TechCheck` theo **Quy Tắc Ngôn Ngữ Kiểm Chứng**. Viết mã HTTP / câu SQL / tên bảng vào phần TC chính là **vi phạm Gate #8**.
+
+> 🔑 **Bốn nhánh `API` · `Database` · `Integration` · `Logging/Audit` là thuộc tính CẤP DỰ ÁN, không phải cấp module.** QA có quyền gọi API hay không thì mọi module đều giống nhau — hỏi lại ở từng module là bắt user trả lời cùng một câu hàng chục lần.
+>
+> **Thứ tự bắt buộc:**
+> 1. **Đọc `docs/requirements/README.md`** → bảng thuộc tính ở đầu file, dòng **`Năng lực kiểm thử của QA`**. Có sẵn thì **dùng luôn, KHÔNG hỏi lại** — chép nguyên lý do và người chịu trách nhiệm vào bảng đối soát 4 vòng
+> 2. Chưa có dòng đó (dự án cũ, hoặc `/discover-system` chạy trước khi có luật này) → hỏi user **đúng một lần**, rồi **ghi ngay vào `docs/requirements/README.md`** trước khi sinh dòng TC đầu tiên
+> 3. Trả lời của user **có thể kiểm chứng được** thì kiểm luôn thay vì tin lời: mở đúng trang nhật ký hoạt động của hệ thống, thử gọi một API đọc. Ghi **kết quả đo** kèm ngày vào README — nó chính xác hơn câu trả lời từ trí nhớ
+>
+> Mẫu dòng ghi vào bảng thuộc tính của `docs/requirements/README.md`:
+>
+> ```markdown
+> | **Năng lực kiểm thử của QA** | Chốt <ngày> — dùng cho nhánh Vòng 3 của **mọi** bộ TC:<br>• Gọi API: ❌/✅ + ai chịu nếu ❌<br>• Truy vấn CSDL: ❌/✅ + ai chịu<br>• Kiểm tầng tích hợp: ❌/✅ + ai chịu<br>• Xem nhật ký hoạt động: ❌/✅ + đường dẫn đã thử + kết quả đo<br>• DevTools trình duyệt: ❌/✅ |
+> ```
+>
+> Dòng này đổi khi **quyền của QA đổi** (được cấp tài khoản mới, mở quyền DB), không đổi theo module. Đổi thì cập nhật README và ghi vào Nhật ký danh mục — các bộ TC đã sinh có nhánh `➖` vì lý do cũ cần rà lại.
+
+| Nhánh | Kích hoạt khi | TC phải có | Mặc định nếu không áp dụng |
+|---|---|---|---|
+| **Permission** | Có ≥2 role | Ma trận Phân quyền: mỗi role × mỗi hành động · truy cập URL trực tiếp khi không đủ quyền · phần tử ẩn/khoá đúng theo role | 🚫 **Không được `➖`** khi hệ thống có ≥2 role |
+| **Security** | Luôn (mức cơ bản) | Truy cập khi chưa đăng nhập · dữ liệu người này có lộ sang người kia không · XSS/SQLi ở field text · phiên sau khi đăng xuất · nút Back sau đăng xuất | `➖` chỉ khi có đội security riêng — **bắt buộc ghi tên đội** |
+| **API** | QA được phép gọi API | Mã trạng thái theo từng thao tác · gọi thẳng API bỏ qua UI · gọi thiếu/sai token | `➖` ghi *"QA không có quyền gọi API"* |
+| **Database** | QA được phép truy vấn DB | Dữ liệu lưu đúng bảng/đúng kiểu · xoá mềm hay xoá cứng · dữ liệu rác còn lại sau khi huỷ giữa chừng | `➖` ghi *"không có quyền truy cập DB — đội Dev xác minh"* |
+| **Integration** | Có tích hợp bên thứ ba | Bên thứ ba trả lỗi / quá hạn chờ / không phản hồi → app xử lý ra sao | `➖` ghi rõ hệ thống nào không kiểm |
+| **Logging / Audit** | Có yêu cầu nhật ký thao tác | Thao tác quan trọng có ghi nhật ký (ai · lúc nào · đổi gì) · nhật ký không lộ dữ liệu nhạy cảm | `➖` ghi *"requirements không có yêu cầu audit"* |
+
+---
+
+### VÒNG 4 — NON-FUNCTIONAL & REGRESSION
+
+> Ở app nghiệp vụ thông thường, **phần lớn vòng này chấm `➖` là kết quả ĐÚNG** — không phải thiếu sót. Nhưng `➖` phải **ghi ai chịu trách nhiệm**; ô `➖` ở đây chính là nguồn cho mục **2.2 Ngoài phạm vi** của `/generate-master-test-plan`. Đó là khác biệt giữa *"QA quên test"* và *"đã xem xét và thống nhất không test"*.
+
+| Nhánh | Kích hoạt khi | TC phải có | Ghi chú |
+|---|---|---|---|
+| **Compatibility** | Có cam kết đa trình duyệt | Danh sách trình duyệt/phiên bản **đã chốt** × luồng chính | Ghi rõ trình duyệt nào **không** kiểm |
+| **Responsive / UI Stability** | App có bản web đáp ứng | Các breakpoint **đã chốt** (VD 1920 · 1366 · 768 · 375) · không tràn ngang · không đè chữ · phóng to 125% | Phải chốt danh sách breakpoint — cấm ghi *"mọi kích thước màn hình"* |
+| **Accessibility** | Luôn (mức cơ bản) | Tab theo thứ tự hợp lý · Enter/Space kích hoạt · viền focus nhìn thấy được · ảnh có văn bản thay thế | WCAG đầy đủ cần công cụ riêng → phần đó `➖` |
+| **Performance** | Có ngưỡng thời gian đã cam kết | Chỉ mức quan sát thô: trang tải quá lâu · danh sách lớn bị treo | Đo tải thật → `➖`, ghi đội hiệu năng |
+| **Regression** | Module đã từng có bug được đóng | Mỗi bug đã đóng = 1 TC chống tái phát, **trỏ về mã bug** | Nguồn: `docs/bugs/<module>/` |
+| **E2E** | Luồng đi qua ≥2 module | Kịch bản xuyên module, dữ liệu chảy từ module này sang module kia | Luồng phức tạp → chuyển sang `/generate-cross-module-test-plan` |
+
+---
+
+### Độ sâu theo rủi ro — không phải chức năng nào cũng chạy đủ 4 vòng
+
+Bảng 4 vòng ở trên chống **bỏ sót**. Mục này chống **thừa** — bơm 50 TC cho một trang "Giới thiệu" tĩnh cũng tai hại ngang bỏ quên lớp giao diện của màn thanh toán: nó ngốn công viết, công chạy, công bảo trì, và làm loãng bộ TC thật.
+
+Cơ chế phân xử **không phải là cái mới** — đó chính là `Risk Level` vốn đã có ở cột bảng TC và ở Bước 5 của Mode FULL RBT. Mục này nối nó vào khung 4 vòng.
+
+#### Chấm mức rủi ro — agent tự chấm, KHÔNG hỏi user
+
+| Mức | Điều kiện | Cách chấm |
+|---|---|---|
+| **Cao** | Chỉ cần **MỘT** dấu hiệu: đụng tiền hoặc số liệu tài chính · đụng xác thực/phân quyền · đụng dữ liệu cá nhân khách hàng · có thao tác **không hồi lại được** (xoá cứng, gửi mail ra ngoài, chốt sổ) · là **cổng vào** module khác (hỏng thì chặn cả đợt kiểm thử) | Đủ 1 dấu hiệu là Cao, không cần cân nhắc thêm |
+| **Thấp** | Phải đủ **CẢ BỐN**: chỉ hiển thị, không ghi dữ liệu · không có field nhập (hoặc chỉ có ô tìm kiếm) · hỏng thì không ai mất dữ liệu và không chặn việc gì · sửa lại được trong vài phút, không cần triển khai lại | Thiếu một điều kiện là **không** được chấm Thấp |
+| **Trung bình** | Phần còn lại | Mặc định khi lưỡng lự |
+
+> 🚨 **Lưỡng lự thì chấm mức CAO HƠN.** Chấm nhầm Cao chỉ tốn công viết thừa vài TC; chấm nhầm Thấp là bỏ lọt lỗi ra production. Hai sai lầm này **không cùng giá**.
+>
+> Agent **tự chấm và ghi căn cứ** — không thêm câu hỏi cho user. User phủ quyết ở **checkpoint Bước 4** (FULL RBT) hoặc ở dòng kế hoạch batch (QUICK); đó là lúc nhìn một bảng là chặn được, rẻ hơn nhiều so với chặn sau khi đã sinh xong.
+
+#### Ba mức độ sâu
+
+| | **Đầy đủ** (rủi ro Cao) | **Tiêu chuẩn** (Trung bình) | **Tối giản** (Thấp) |
+|---|---|---|---|
+| **V1 Smoke** | Đủ 6 nhánh | Đủ 6 nhánh | **Đủ 6 nhánh — KHÔNG rút** |
+| **V2 Functional** | Đủ mọi nhánh có điều kiện kích hoạt | Đủ mọi nhánh có điều kiện kích hoạt | Chỉ `Required` · `Validation` của field **có ràng buộc thật**; phần còn lại `⏭️` |
+| **V3 Technical** | Đủ 6 nhánh | `Permission` + `Security`; còn lại theo Năng lực kiểm thử của QA | `Permission` (nếu ≥2 role); còn lại `⏭️` |
+| **V4 Non-functional** | Đủ 6 nhánh | `Responsive` + `Accessibility`; còn lại `⏭️` | Toàn bộ `⏭️` |
+| **Số TC điển hình** (độ hạt GỘP, module cỡ Login) | 40–60 | 20–30 | 8–12 |
+
+#### Bốn thứ KHÔNG BAO GIỜ rút, bất kể rủi ro thấp đến đâu
+
+| Không rút | Vì sao |
+|---|---|
+| **Toàn bộ V1** | Bỏ V1 thì không biết chức năng **có chạy được không**. Sáu TC là cái giá rẻ nhất để biết điều đó |
+| `V2 · Required` + `V2 · Validation` khi **có field nhập** | Có ô nhập là có người nhập sai. Trang "chỉ hiển thị" mà có ô nhập thì nó không còn là "chỉ hiển thị" — chấm lại mức rủi ro |
+| `V3 · Permission` khi hệ thống có **≥2 vai trò** | Lỗi phân quyền không tỷ lệ với độ quan trọng của chức năng: một trang xem báo cáo tưởng vô hại vẫn có thể lộ dữ liệu cả công ty |
+| `V3 · Security` khi chức năng chạm **dữ liệu của người dùng khác** | Cùng lý do trên |
+
+#### Trạng thái thứ tư: `⏭️` — phân biệt với `➖`
+
+Bảng đối soát 4 vòng có **bốn** trạng thái, không phải ba:
+
+| Ký hiệu | Nghĩa | Bắt buộc ghi kèm |
+|---|---|---|
+| `✅` | Có TC | TC ID (kèm số biến thể nếu GỘP) |
+| `➖` | **Không áp dụng** — không có thứ đó để kiểm (module không có CRUD, không có dropdown, không có tích hợp) | Lý do kỹ thuật |
+| `⏭️` | **Cố ý bỏ** — có thứ đó, kiểm được, nhưng **quyết định không kiểm** vì rủi ro thấp | **Lý do + ai quyết định + điều kiện rà lại** |
+| `🔴` | Thiếu — phải bổ sung trước khi xuất | — |
+
+> 🚨 **`➖` và `⏭️` KHÔNG được dùng lẫn.** `➖` là **sự thật kỹ thuật** ("hệ thống không có cái đó"). `⏭️` là **một quyết định có người chịu trách nhiệm** ("có, nhưng chúng tôi chấp nhận rủi ro không kiểm"). Khi có sự cố production, hai câu đó dẫn tới hai cuộc họp hoàn toàn khác nhau. Ghi `➖` cho thứ thật ra là `⏭️` là **giấu quyết định** — nguy hiểm hơn cả bỏ trống ô.
+
+Mẫu dòng `⏭️` đạt yêu cầu:
+
+```markdown
+| 4 | Compatibility | ⏭️ Cố ý bỏ | Trang tĩnh, rủi ro Thấp — chỉ kiểm Chrome. **Quyết định: QA lead, 2026-09-11.** Rà lại khi trang có thêm field nhập hoặc khi hệ thống cam kết hỗ trợ trình duyệt mới |
+```
+
+```markdown
+❌ Không đạt: | 4 | Compatibility | ⏭️ | Không cần thiết |
+```
+
+#### Ghi mức độ sâu vào tài liệu TC
+
+Ngay dưới tiêu đề bộ TC, thêm một dòng để người đọc biết bộ này **cố tình** dừng ở đâu:
+
+```markdown
+| **Mức rủi ro · độ sâu** | `Thấp` → **Tối giản** — V1 đủ 6 nhánh, V2 chỉ nhánh có ràng buộc, V3/V4 phần lớn `⏭️`.<br>Căn cứ chấm Thấp: chỉ hiển thị · không ghi dữ liệu · không có field nhập · hỏng không chặn việc gì.<br>**Nâng lên Tiêu chuẩn khi:** thêm bất kỳ field nhập nào, hoặc chức năng bắt đầu ghi dữ liệu |
+```
+
+> Dòng **"Nâng lên khi…"** là phần quan trọng nhất — nó biến quyết định rút gọn hôm nay thành thứ **tự hết hạn** khi chức năng lớn lên, thay vì một lựa chọn bị quên vĩnh viễn.
+
+---
+
+### Cách dùng — 5 quy tắc
+
+1. **Chia batch theo VÒNG**, không chia tự do theo nhóm chức năng. Vòng 2 đông TC thì chia con **bên trong vòng đó** theo nhóm chức năng.
+2. **Chấm từng nhánh, không bỏ trống ô nào** — **bốn** trạng thái: `✅ Có TC` (dẫn TC ID) · `➖ Không áp dụng` (không có thứ đó để kiểm — ghi lý do kỹ thuật) · `⏭️ Cố ý bỏ` (có nhưng rủi ro thấp — ghi **lý do + ai quyết định + điều kiện rà lại**) · `🔴 Thiếu` (phải bổ sung **trước khi xuất**). Xem mục **Độ sâu theo rủi ro** ở trên để biết khi nào được dùng `⏭️`.
+3. 🚫 **KHÔNG sinh TC để lấp ô, cũng KHÔNG chạy đủ 4 vòng cho chức năng rủi ro Thấp.** Nhánh không có gì để kiểm thì `➖`; nhánh có mà không đáng đầu tư thì `⏭️`. TC sinh ra chỉ cho bảng đẹp là TC rác — cùng một luật với bảng ISO 25010.
+4. **Ba nhánh KHÔNG BAO GIỜ được `➖`:** `UI cơ bản` (V1) · `Validation` (V2, khi có field nhập) · `Permission` (V3, khi có ≥2 role). Chấm `➖` ở ba chỗ này là dấu hiệu agent đang né việc.
+5. **Độ hạt GỘP thì cột dẫn chứng ghi cả số biến thể** — `TC_001–TC_003 (3 TC · 11 biến thể)`. Gộp làm số TC giảm, nhưng **số biến thể không được giảm**; không ghi số biến thể thì không ai phát hiện được việc rụng case.
+
+### Bảng xuất kèm output (đặt cuối tài liệu TC, **trước** bảng ISO 25010)
+
+```markdown
+## Đối soát loại kiểm thử (4 vòng)
+
+| Vòng | Nhánh | Trạng thái | TC ID / Lý do |
+|---|---|---|---|
+| 1 | UI cơ bản | ✅ | TC_001–TC_003 (3 TC · 11 biến thể) |
+| 1 | Open form · Display | ✅ | TC_004–TC_006 |
+| 1 | Input valid · Save · Verify | ✅ | TC_007–TC_009 |
+| 2 | Required | ✅ | TC_010–TC_012 |
+| 2 | Validation | ✅ | TC_013–TC_028 (16 TC · 61 biến thể · đủ 9/9 mục bảng Password) |
+| 2 | Error Guessing | 🔴 Thiếu | Chưa có TC bấm Lưu hai lần liên tiếp → **bổ sung trước khi xuất** |
+| 3 | Permission | ✅ | TC_040–TC_047 (3 role × 3 hành động) |
+| 3 | Database | ➖ | QA không có quyền truy cập DB — đội Dev xác minh |
+| 4 | Responsive | ✅ | TC_050–TC_052 (1920 · 1366 · 768) |
+| 4 | Performance | ➖ | Không có công cụ tải — đội Hạ tầng, đợt sau |
+| 4 | Regression | ➖ | Module mới, chưa có bug nào được đóng |
+```
+
+---
+
 ## Bảng Field-Level Validation Checklist (15 Field Types)
 
 Khi form/UI có các input fields, agent **BẮT BUỘC** phải liệt kê từng trường và sinh validation TCs riêng theo loại:
@@ -555,6 +784,7 @@ Form input chỉ là một phần của app. Khi module có các thành phần s
 
 | Component | Checklist cần test |
 |---|---|
+| **Giao diện tĩnh của màn hình** | Đủ thành phần theo evidence (nhãn nguyên văn, thứ tự field, nút, liên kết, tiêu đề) · trạng thái mặc định từng ô (rỗng / tick sẵn / option đang chọn) · con trỏ đang ở ô nào khi vừa mở · định dạng hiển thị (tiền tệ, ngày, giờ, badge) · trạng thái rỗng · trạng thái đang tải · văn bản gợi ý trong ô (placeholder) · tooltip |
 | **Data Table / List** | Sort từng cột (asc/desc) · Filter đơn + kết hợp nhiều filter · Search (khớp một phần, không dấu/có dấu, không có kết quả) · Pagination (trang đầu/cuối, đổi page size, nhảy trang) · Empty state (chưa có data) · Danh sách lớn (100+ bản ghi) · Bulk action (chọn tất cả, chọn một phần, thao tác hàng loạt) · Refresh giữ/mất filter đang áp |
 | **CRUD Lifecycle** | Create → hiển thị đúng trong list · View detail khớp data đã tạo · Edit → lưu → verify data cập nhật (cả trong list và detail) · Delete → confirm dialog (Cancel giữ nguyên / OK xóa) · Xóa bản ghi đang được liên kết (foreign key) · Tạo trùng unique field · Edit đồng thời 2 người (concurrent) |
 | **Permission / Role** | Đối chiếu **Ma trận Phân quyền** trong requirements: mỗi role × mỗi hành động = 1 TC · Truy cập URL trực tiếp khi không có quyền (bypass UI) · Element ẩn/disable đúng theo role · API trả 403 khi gọi trái quyền |
@@ -673,12 +903,14 @@ Agent phải tích hợp thêm các tình huống kiểm thử nâng cao khi ph�
 
 ## 🛡️ AI Self-Quality Gate (Quy trình Tự Kiểm Định Chất Lượng)
 
-Trước khi xuất kết quả cuối cùng cho user, Agent **BẮT BUỘC** tự rà soát qua 10 tiêu chí (0–9):
+Trước khi xuất kết quả cuối cùng cho user, Agent **BẮT BUỘC** tự rà soát qua 11 tiêu chí (0–10):
 - [ ] **0. Độ hạt nhất quán:** Đã chốt GỘP hay TÁCH **trước** batch đầu và nêu ra chat. Toàn bộ bộ TC theo **một** độ hạt, không nửa gộp nửa tách. Nếu GỘP: mọi biến thể có mã riêng (`a`, `b`…), không TC nào quá 6 biến thể, không TC nào vi phạm bảng CẤM gộp.
 - [ ] **1. Unique TC ID:** Đảm bảo không trùng mã TC ID và đúng quy tắc dự án (`PROJECT_MODULE_TC_001`).
 - [ ] **2. 1-to-1 Step-Expected Matching:** Các bước `Test Steps` đánh số rõ ràng (1,2,3 — mỗi bước 1 hành động) và khớp 1-1 với `Expected Result` đánh số tương ứng.
 - [ ] **3. Concrete Test Data:** 100% test data chứa giá trị cụ thể, không còn từ ngữ mơ hồ ("hợp lệ", "dữ liệu đúng").
-- [ ] **4. Field Validation Coverage:** Mọi input field trên UI đều có ít nhất 1 Positive TC và 2+ Negative/Boundary TCs.
+- [ ] **4. Field Validation Coverage (đối soát theo BẢNG, không đếm theo số):** với **TỪNG** input field, mở đúng dòng loại field trong **Bảng Field-Level Validation Checklist (15 loại)** và đối soát **đủ từng mục** của dòng đó. Mục nào không áp dụng phải **ghi lý do một dòng**, không được im lặng bỏ qua.
+  > 🚨 `≥1 Positive + 2 Negative` là **sàn tối thiểu, KHÔNG phải mức đạt**. Trường Password có 9 mục trong bảng — sinh 3 TC rồi dừng là **trượt tiêu chí này**, dù về số lượng vẫn qua sàn. Đây chính là chỗ bộ TC bị nông mà vẫn xanh hết bảng.
+  > Xuất kèm cột đối soát trong **Bảng Đối soát loại kiểm thử** dòng `V2 · Validation`: `đủ N/N mục bảng <loại field>`.
 - [ ] **5. Automation Metadata Ready:** 100% test cases được gắn đầy đủ `Automatable`, `Auto Type`, và `@Tag`.
 - [ ] **6. Requirement Coverage (đối soát "đủ case"):** 100% REQ ID có **≥1 TC** trỏ về; REQ mức High Risk có đủ Positive + Negative + Boundary. Xuất **Bảng Đối Soát Coverage** kèm output:
 
@@ -690,7 +922,7 @@ Trước khi xuất kết quả cuối cùng cho user, Agent **BẮT BUỘC** t�
 ```
 > Nếu có REQ nào 0 TC → agent PHẢI quay lại sinh bổ sung, KHÔNG được xuất kết quả có dòng 🔴.
 
-- [ ] **7. Evidence-verified:** đã mở **100%** ảnh trong `docs/requirements/<module>/evidence/`; mọi TC thuộc 4 nhóm bắt buộc (bố cục/thứ tự · nhãn nguyên văn · giá trị mặc định · định dạng hiển thị) đều truy được về một tấm ảnh cụ thể **hoặc một lần đọc DOM cụ thể**. TC không truy được → gắn `@NeedsVerify` và liệt kê ở mục "Vùng chưa có evidence". Xuất kèm **Bảng Đối Soát Evidence**:
+- [ ] **7. Evidence-verified:** đã mở **100%** ảnh trong `docs/requirements/<module>/<nền-tảng>/evidence/`; mọi TC thuộc 4 nhóm bắt buộc (bố cục/thứ tự · nhãn nguyên văn · giá trị mặc định · định dạng hiển thị) đều truy được về một tấm ảnh cụ thể **hoặc một lần đọc DOM cụ thể**. TC không truy được → gắn `@NeedsVerify` và liệt kê ở mục "Vùng chưa có evidence". Xuất kèm **Bảng Đối Soát Evidence**:
 
 ```markdown
 | Ảnh evidence | Màn hình / trạng thái | TC dựa vào | Đầy đủ? |
@@ -706,13 +938,22 @@ Trước khi xuất kết quả cuối cùng cho user, Agent **BẮT BUỘC** t�
 - [ ] **9. Rà soát đặc tính chất lượng (ISO/IEC 25010:2023)** — áp dụng **QUICK · FULL RBT · DELTA**, KHÔNG áp dụng CHECKLIST: đã chấm đủ **9/9 đặc tính**, không ô nào trống. Ô `➖` có ghi **ai chịu trách nhiệm** (không chỉ ghi "ngoài phạm vi" trơn). Ô 🔴 phải bổ sung TC **trước khi xuất**. Bảng rà soát đặt ở cuối tài liệu TC.
   > Với **DELTA**: chỉ chấm lại đặc tính bị ticket chạm tới, giữ nguyên phần còn lại của bảng — không rà lại cả module.
 
+- [ ] **10. Đối soát loại kiểm thử 4 vòng** (theo [Bản Đồ Loại Kiểm Thử — 4 Vòng](#bản-đồ-loại-kiểm-thử--4-vòng-bắt-buộc--khung-sinh-tc-cho-quick--full-rbt--delta)) — áp dụng **QUICK · FULL RBT · DELTA**, KHÔNG áp dụng CHECKLIST:
+  - Đã chấm **mọi nhánh** của cả 4 vòng, không ô nào trống. Xuất **Bảng Đối soát loại kiểm thử** đặt cuối tài liệu TC, **trước** bảng ISO 25010
+  - Ô `➖` ghi **lý do kỹ thuật**; ô `⏭️` ghi **lý do + ai quyết định + điều kiện rà lại**; ô 🔴 phải bổ sung TC **trước khi xuất**
+  - **`➖` và `⏭️` không được dùng lẫn** — `➖` là sự thật kỹ thuật (hệ thống không có cái đó), `⏭️` là quyết định chấp nhận rủi ro. Ghi `➖` cho thứ thật ra là `⏭️` là **giấu quyết định**
+  - Mức rủi ro đã chấm và **độ sâu tương ứng** (Đầy đủ / Tiêu chuẩn / Tối giản) phải ghi ở đầu tài liệu TC, kèm dòng **"Nâng lên khi…"**
+  - **Ba nhánh không bao giờ được `➖`:** `UI cơ bản` (V1) · `Validation` (V2, khi có field nhập) · `Permission` (V3, khi có ≥2 role)
+  - Độ hạt **GỘP** → cột dẫn chứng ghi **cả số TC và số biến thể**: `TC_001–TC_003 (3 TC · 11 biến thể)`. Thiếu số biến thể = không kiểm chứng được gộp có làm rụng case hay không
+  > Với **DELTA**: chỉ chấm lại nhánh bị ticket chạm tới, giữ nguyên phần còn lại của bảng.
+
 ---
 
 # Mode 2: FULL RBT — Quy Trình AI-RBT 6 Bước
 
 ## Mục đích
 
-Quy trình bài bản, tuần tự cho module phức tạp. Bao gồm phân tích Ambiguity, phân rã hệ thống, Traceability Matrix, đánh giá Risk Level, và sinh test cases chi tiết.
+Quy trình bài bản, tuần tự cho module phức tạp. Bao gồm phân tích Ambiguity, phân rã hệ thống, Traceability Matrix, đánh giá Risk Level, và sinh test cases chi tiết **theo 4 vòng kiểm thử** (Smoke → Functional → Technical → Non-functional).
 
 > ⚠️ **QUAN TRỌNG:** Quy trình này **BẮT BUỘC chạy tuần tự** từng bước. KHÔNG được gộp nhiều bước chạy 1 lần. Mỗi bước phải hoàn thành và được user xác nhận trước khi sang bước tiếp.
 
@@ -735,7 +976,7 @@ Quy trình bài bản, tuần tự cho module phức tạp. Bao gồm phân tíc
 3. Tóm tắt scope kiểm thử
 4. **Chờ user xác nhận** trước khi sang Bước 2
 
-> ⚠️ **Bước 1 chưa xong nếu chưa mở evidence.** Trước khi tóm tắt scope, agent phải liệt kê `docs/requirements/<module>/evidence/` và `Read` từng ảnh theo [Quy Tắc Đối Chiếu Evidence](#quy-tắc-đối-chiếu-evidence-bắt-buộc--áp-dụng-cả-3-modes-chạy-trước-batch-đầu-tiên). Kết quả đưa vào Output dưới dạng **Danh mục Evidence** (ảnh nào đủ / cắt cụt / thiếu).
+> ⚠️ **Bước 1 chưa xong nếu chưa mở evidence.** Trước khi tóm tắt scope, agent phải liệt kê `docs/requirements/<module>/<nền-tảng>/evidence/` và `Read` từng ảnh theo [Quy Tắc Đối Chiếu Evidence](#quy-tắc-đối-chiếu-evidence-bắt-buộc--áp-dụng-cả-3-modes-chạy-trước-batch-đầu-tiên). Kết quả đưa vào Output dưới dạng **Danh mục Evidence** (ảnh nào đủ / cắt cụt / thiếu).
 
 **Output:** Xác nhận hiểu bối cảnh + tóm tắt scope kiểm thử + **Danh mục Evidence đã mở**.
 
@@ -787,12 +1028,12 @@ Quy trình bài bản, tuần tự cho module phức tạp. Bao gồm phân tíc
 **Agent phải:**
 1. Map mỗi Module/Rule với mã Yêu cầu (REQ-01, REQ-02...)
 2. Cross-check xem có yêu cầu nào bị thiếu trong danh sách phân rã (Gap Analysis)
-3. Liệt kê High-Level Test Scenarios cho từng Module, tập trung:
-   - Security / phân quyền
-   - UI Validation
-   - Business Logic
-   - Data Integrity
-   - Error Handling
+3. Liệt kê High-Level Test Scenarios cho từng Module, **xếp theo 4 vòng** (xem [Bản Đồ Loại Kiểm Thử — 4 Vòng](#bản-đồ-loại-kiểm-thử--4-vòng-bắt-buộc--khung-sinh-tc-cho-quick--full-rbt--delta)):
+   - **V1 Smoke:** giao diện cơ bản · mở form · hiển thị · nhập hợp lệ · lưu · đối chiếu dữ liệu
+   - **V2 Functional:** hành vi giao diện · bắt buộc · validation · EP · BVA · quy tắc nghiệp vụ · bảng quyết định · chuyển trạng thái · phụ thuộc · kịch bản nghiệp vụ · CRUD · đoán lỗi
+   - **V3 Technical:** phân quyền · bảo mật · API · CSDL · tích hợp · nhật ký
+   - **V4 Non-functional:** tương thích · đáp ứng · bàn phím/trợ năng · hiệu năng · hồi quy · xuyên module
+   > Chấm sơ bộ mỗi nhánh `✅ sẽ sinh` / `➖ không áp dụng (ghi lý do + ai chịu)` **ngay ở bước này** — đây là lúc user review rẻ nhất, trước khi sinh TC chi tiết.
 4. **Chờ user review** danh sách scenarios trước khi sinh test case chi tiết
 
 **Output:** Traceability Matrix + High-Level Test Scenarios.
@@ -804,10 +1045,11 @@ Quy trình bài bản, tuần tự cho module phức tạp. Bao gồm phân tíc
 **Mục đích:** Sinh test cases chi tiết theo chiến lược Risk-Based Testing.
 
 **Agent phải:**
-1. Đánh giá Risk Level cho mỗi Module:
-   - **High Risk:** Test kỹ, nhiều cases (nghiệp vụ quan trọng, liên quan tiền, bảo mật)
-   - **Medium Risk:** Test vừa phải
-   - **Low Risk:** Test cơ bản, happy path
+1. Đánh giá Risk Level cho mỗi Module **theo bảng tiêu chí ở mục [Độ sâu theo rủi ro](#độ-sâu-theo-rủi-ro--không-phải-chức-năng-nào-cũng-chạy-đủ-4-vòng)** — agent tự chấm và ghi căn cứ, KHÔNG hỏi user:
+   - **Cao** → độ sâu **Đầy đủ**: đủ mọi nhánh của cả 4 vòng (40–60 TC)
+   - **Trung bình** → độ sâu **Tiêu chuẩn**: V1 + V2 đủ, V3 giới hạn ở `Permission`/`Security`, V4 giới hạn ở `Responsive`/`Accessibility` (20–30 TC)
+   - **Thấp** → độ sâu **Tối giản**: V1 đủ 6 nhánh (**không rút**), V2 chỉ nhánh có ràng buộc thật, V3/V4 phần lớn `⏭️` (8–12 TC)
+   > ⚠️ Lưỡng lự thì chấm **mức cao hơn**. Bốn thứ không bao giờ rút: toàn bộ V1 · `Required`+`Validation` khi có field nhập · `Permission` khi ≥2 vai trò · `Security` khi chạm dữ liệu người dùng khác.
 2. Sinh test case với đầy đủ fields:
    - Module / Sub-module
    - **REQ ID** (mã requirement mà TC cover — lấy từ Traceability Matrix ở Bước 4)
@@ -817,7 +1059,9 @@ Quy trình bài bản, tuần tự cho module phức tạp. Bao gồm phân tíc
    - Expected Results (đánh số khớp 1-1 với steps)
    - Test Data (**phải cụ thể**, không dùng placeholder chung chung)
    - Priority
-3. Bao phủ đa dạng:
+3. **Sinh tuần tự theo 4 vòng** — V1 Smoke → V2 Functional → V3 Technical → V4 Non-functional. Mỗi batch **nằm trọn trong một vòng**, không trộn vòng.
+   Vòng 1 luôn mở đầu bằng nhánh `UI cơ bản` (nhãn nguyên văn · thứ tự field · trạng thái mặc định) — đây là lớp bị bỏ sót nhiều nhất.
+   Bao phủ đa dạng trong từng vòng:
    - Happy Path
    - Negative Path (giá trị biên, vượt ký tự)
    - Edge Cases (timeout, mất kết nối...)
@@ -851,7 +1095,7 @@ Quy trình bài bản, tuần tự cho module phức tạp. Bao gồm phân tíc
    - Test Steps đánh số `1. 2. 3.` (mỗi bước 1 hành động), Expected Result đánh số khớp 1-1, dùng `<br>` xuống dòng trong cell
    - Gắn đầy đủ metadata `Automatable` (`Yes`/`No`/`Partial`), `Auto Type` (`UI`/`API`/`Unit`/`N/A`), và `@Tags` (`@Smoke`, `@Regression`, `@CriticalPath`...)
    - **TUYỆT ĐỐI không được bỏ sót** bất kỳ test case nào đã sinh ở Bước 5
-3. **Chạy Self-Quality Gate (10 Tiêu chí, 0–9):** Kiểm định lại — bao gồm **Bảng Đối Soát Coverage** (tiêu chí 6: mọi REQ có ≥1 TC), **Bảng Đối Soát Evidence** (tiêu chí 7), **rà ngôn ngữ kiểm chứng** (tiêu chí 8) và **Bảng rà soát đặc tính chất lượng ISO/IEC 25010:2023** (tiêu chí 9: đủ 9/9 đặc tính, ô `➖` ghi rõ ai chịu) — trước khi xuất Artifact (`test_cases_<module>.md`).
+3. **Chạy Self-Quality Gate (11 Tiêu chí, 0–10):** Kiểm định lại — bao gồm **Bảng Đối Soát Coverage** (tiêu chí 6: mọi REQ có ≥1 TC), **Bảng Đối Soát Evidence** (tiêu chí 7), **rà ngôn ngữ kiểm chứng** (tiêu chí 8), **Bảng rà soát đặc tính chất lượng ISO/IEC 25010:2023** (tiêu chí 9: đủ 9/9 đặc tính, ô `➖` ghi rõ ai chịu) và **Bảng Đối soát loại kiểm thử 4 vòng** (tiêu chí 10: mọi nhánh được chấm, 3 nhánh cấm `➖`, độ hạt GỘP ghi kèm số biến thể) — trước khi xuất Artifact (`test_cases_<module>.md`).
 
 **Output:** Bảng Test Cases Markdown hoàn chỉnh kèm Metadata Automation.
 
@@ -888,6 +1132,19 @@ Agent **BẮT BUỘC** hỏi hoặc suy ra loại checklist, vì nó quyết đ�
 | **Release-readiness** | Rà toàn hệ thống trước khi lên production | 30–60 | ≤ 60 phút |
 
 > Vượt ngưỡng số mục → agent PHẢI tách theo module hoặc hạ scope, KHÔNG xuất checklist dài lê thê (mất tác dụng "rà nhanh").
+
+### Lấy mục từ vòng nào
+
+Checklist **không** chấm bảng đối soát 4 vòng (Gate #10 không áp dụng cho mode này), nhưng vẫn **lấy mục theo vòng** để biết dừng ở đâu:
+
+| Loại checklist | Lấy mục từ | Bỏ qua |
+|---|---|---|
+| **Smoke** | **Chỉ V1** — UI cơ bản · mở form · hiển thị · nhập hợp lệ · lưu · đối chiếu dữ liệu | Toàn bộ V2–V4 |
+| **Post-hotfix** | V1 của vùng vá + nhánh V2 mà bản vá chạm tới | V3 · V4 |
+| **Regression (module)** | V1 + V2 đầy đủ + nhánh V3 `Permission` | V4 (trừ `Regression` nếu module có bug cũ) |
+| **Release-readiness** | V1 + nhánh sống còn của V2 + `Permission`/`Security` (V3) + `E2E` (V4) | Phần còn lại của V3 · V4 |
+
+> Checklist Smoke mà có mục validation biên hay bảng quyết định là **sai loại** — đó là V2, thuộc bộ TC chi tiết. Smoke chỉ trả lời *"build này có dùng được không"*.
 
 ## Quy trình (1 lượt duy nhất)
 
@@ -977,40 +1234,54 @@ Vì vậy Mode DELTA đặt việc **bảo toàn TC ID** lên trên mọi mục 
 
 | # | Quy tắc | Vì sao |
 |---|---|---|
-| 1 | **Sửa tại chỗ** trong `test_cases_<module>.md` / `parts/part_NN_*.md` — tên file không đổi | Mọi workflow sau (`/execute-test-cases`, `/update-automation-from-impact`, `/generate-traceability-matrix`) đọc theo mẫu đường dẫn cố định |
-| 2 | **Sao lưu trước khi sửa** vào `archive/test_cases_<module>_v<N>.md` | Sửa tại chỗ không có bản đối chiếu thì không ai kiểm được agent đã đổi gì |
+| 1 | **Sửa tại chỗ** trong file nền tảng `<nền-tảng>/test_cases_<module>_<nền-tảng>.md` / `<nền-tảng>/parts/part_NN_*.md` — tên file không đổi | Mọi workflow sau (`/execute-test-cases`, `/update-automation-from-impact`, `/generate-traceability-matrix`) đọc theo mẫu đường dẫn cố định |
+| 2 | **Sao lưu trước khi sửa** vào `archive/test_cases_<module>_<nền-tảng>_v<N>.md` | Sửa tại chỗ không có bản đối chiếu thì không ai kiểm được agent đã đổi gì |
 | 3 | **Giữ nguyên TC ID.** TC mới cấp số tiếp dải hiện có, KHÔNG chèn vào giữa | Xem nguyên tắc gốc ở trên |
 | 4 | **KHÔNG xoá dòng TC.** Chức năng gỡ → `🗑️ Deprecated (TICKET-XXX)` | Đối xứng quy tắc "KHÔNG xoá dòng REQ". Xoá dòng là mất dấu vết TC từng tồn tại, và script tương ứng thành orphan |
 | 5 | **Đọc REQ đã đổi, không suy từ tên TC** | Tên TC không chứa kỳ vọng. Sửa theo suy đoán tạo ra TC nghe hợp lý nhưng sai kỳ vọng mới — loại lỗi khó phát hiện nhất |
 
 ## Bảng ánh xạ: REQ đổi gì → TC sửa gì
 
-| Delta của REQ | Hành động với TC |
-|---|---|
-| Đổi expected result / message | Sửa cột Expected Result, ghi message **nguyên văn** từ UI |
-| Field tuỳ chọn → **bắt buộc** | Sửa TC happy path + **thêm TC negative** để trống field |
-| Đổi luật validation (độ dài, định dạng, dải) | Sửa lại **cả 3 mốc** boundary: dưới / đúng / trên ngưỡng |
-| Đổi steps / luồng | Sửa Steps + kiểm Precondition còn đúng không |
-| Đổi phân quyền | Sửa TC phân quyền + kiểm ma trận role |
-| REQ 🔴 bị gỡ | TC → `🗑️ Deprecated`, giữ dòng |
-| REQ 🟢 mới | ❌ Ngoài phạm vi DELTA → QUICK / FULL RBT |
+| Delta của REQ | Vòng · Nhánh | Hành động với TC |
+|---|---|---|
+| Đổi **nhãn nguyên văn** (nút, tiêu đề, nhãn field, thông báo) | **V1 · UI cơ bản** | Sửa nhãn trong bảng kiểm màn hình **và** mọi Expected Result trích nhãn đó |
+| **Thêm / bớt field** trên form | **V1 · UI cơ bản** (+ V2 kèm theo) | Thêm/bớt **dòng bảng kiểm** thành phần màn hình, kiểm lại thứ tự field — **rồi mới** tới TC Required/Validation ở V2 |
+| Đổi **giá trị mặc định** (checkbox tick sẵn, option đang chọn) | **V1 · UI cơ bản** | Sửa dòng tương ứng trong bảng kiểm |
+| Đổi **định dạng hiển thị** (tiền, ngày, badge) | **V1 · Display** | Sửa Expected Result ghi đúng định dạng mới |
+| Đổi **hành vi giao diện** (nút khoá đến khi đủ điều kiện, field bật/tắt) | **V2 · UI Behavior** | Sửa TC hành vi, kiểm **cả hai chiều** bật/tắt điều kiện |
+| Đổi expected result / message | V2 · theo nhánh của TC | Sửa cột Expected Result, ghi message **nguyên văn** từ UI |
+| Field tuỳ chọn → **bắt buộc** | **V2 · Required** | Sửa TC happy path + **thêm TC negative** để trống field |
+| Đổi luật validation (độ dài, định dạng, dải) | **V2 · Validation + BVA** | Sửa lại **cả 3 mốc** boundary: dưới / đúng / trên ngưỡng |
+| Đổi steps / luồng | **V2 · Use Case** | Sửa Steps + kiểm Precondition còn đúng không |
+| Đổi quy tắc nghiệp vụ / trạng thái | **V2 · Business Rule · State Transition** | Sửa bảng quyết định / bảng transition, cả ô hợp lệ lẫn ô bị chặn |
+| Đổi phân quyền | **V3 · Permission** | Sửa TC phân quyền + kiểm ma trận role |
+| Đổi breakpoint / trình duyệt cam kết | **V4 · Responsive · Compatibility** | Sửa danh sách kích thước/trình duyệt trong TC |
+| REQ 🔴 bị gỡ | Nhánh của TC đó | TC → `🗑️ Deprecated`, giữ dòng |
+| REQ 🟢 mới | — | ❌ Ngoài phạm vi DELTA → QUICK / FULL RBT |
 
-## Tác động lan toả — 3 câu phải tự hỏi
+> 🚨 **Bốn dòng V1 đầu bảng bắt buộc mở evidence trước khi sửa** — đúng **4 nhóm TC không được suy diễn** của [Quy Tắc Đối Chiếu Evidence](#quy-tắc-đối-chiếu-evidence-bắt-buộc--áp-dụng-cả-4-modes-chạy-trước-batch-đầu-tiên). Chưa có ảnh mới của màn hình sau khi đổi thì **không sửa**, gắn `@NeedsVerify` và báo user recon bổ sung.
+>
+> 🚨 **Độ hạt GỘP:** thêm field = thêm **một dòng vào Bảng kiểm** của TC `UI cơ bản` (Kiểu B), KHÔNG tạo TC mới, KHÔNG tách dòng đó ra. Trần 6 biến thể/TC vẫn áp dụng.
+
+## Tác động lan toả — 5 câu phải tự hỏi
 
 Đây là phần Mode DELTA dễ làm hụt nhất, vì Impact Report chỉ liệt kê TC **map trực tiếp** với REQ đã đổi:
 
-1. Field đổi thành bắt buộc → **TC nào khác dùng field đó ở bước phụ** mà giờ sẽ fail?
-2. TC vừa Deprecated → **TC nào lấy nó làm precondition**?
-3. Thêm TC mới có làm file **vượt ngưỡng 40 TC** → phải tách `parts/`?
+1. **Ticket có đụng thứ nhìn thấy được trên màn hình không** (thêm/bớt field, đổi nhãn, đổi vị trí, đổi giá trị mặc định)? → TC `UI cơ bản` ở **Vòng 1** phải cập nhật, **không chỉ** TC validation ở Vòng 2. Sửa xong V2 mà quên V1 là kiểu hụt phổ biến nhất của DELTA
+2. Field đổi thành bắt buộc → **TC nào khác dùng field đó ở bước phụ** mà giờ sẽ fail?
+3. TC vừa Deprecated → **TC nào lấy nó làm precondition**?
+4. Thêm field mới → **bảng 15 loại field** của loại đó đã đối soát đủ từng mục chưa, hay mới sinh 2–3 TC cho xong?
+5. Thêm TC mới có làm file **vượt ngưỡng 40 TC** → phải tách `parts/`?
 
-## Quality Gate DELTA (6 tiêu chí)
+## Quality Gate DELTA (7 tiêu chí)
 
 - [ ] **1.** Mọi TC ID giữ nguyên — không TC nào bị đổi số hay đánh lại từ `001`
 - [ ] **2.** Tên file index không đổi — không có `_improved` / `_v2` ngoài `archive/`
 - [ ] **3.** Không dòng TC nào bị xoá — TC gỡ đều ở trạng thái 🗑️ Deprecated kèm mã ticket
 - [ ] **4.** Bảng Đối Soát Coverage khớp lại — mọi REQ 🟡/🟢 active có ≥1 TC active
-- [ ] **5.** Số TC ở index khớp tổng các `parts/`
-- [ ] **6.** Có **Nhật ký thay đổi** ở cuối file TC + **Delta TC List** xuất ra chat cho automation dùng tiếp
+- [ ] **5.** **Bảng Đối soát loại kiểm thử (4 vòng)** cập nhật **đúng những nhánh ticket chạm tới**, giữ nguyên phần còn lại — KHÔNG rà lại cả module. Ticket đụng thành phần màn hình mà nhánh `V1 · UI cơ bản` không đổi gì = **dấu hiệu đã bỏ sót**
+- [ ] **6.** Số TC ở index khớp tổng các `parts/`
+- [ ] **7.** Có **Nhật ký thay đổi** ở cuối file TC + **Delta TC List** (có cột **Vòng · Nhánh**) xuất ra chat cho automation dùng tiếp
 
 ---
 
@@ -1069,6 +1340,22 @@ Vì vậy Mode DELTA đặt việc **bảo toàn TC ID** lên trên mọi mục 
 - ❌ DELTA tự viết TC cho REQ mới (🟢) — ngoài phạm vi, phải route sang QUICK / FULL RBT
 - ❌ DELTA bỏ qua tác động lan toả (TC dùng field ở bước phụ · TC lấy TC vừa Deprecated làm precondition)
 - ❌ DELTA xong mà không ghi **Nhật ký thay đổi** và không xuất **Delta TC List** — tầng automation mất input
+- ❌ **Bộ TC không có nhánh `UI cơ bản`** — không TC nào kiểm nhãn nguyên văn, thứ tự field, trạng thái mặc định của màn hình. Validation đầy đủ đến đâu cũng vẫn là thiếu hẳn một lớp
+- ❌ **Nhảy cóc vòng** — sinh validation (V2) trước khi có TC mở form và lưu được (V1). V1 fail thì mọi TC V2 đều BLOCKED, chạy hết mới biết là quá muộn
+- ❌ **Trộn TC của hai vòng vào một batch** — mất ranh giới chia việc và không chấm được bảng đối soát
+- ❌ **Đọc lướt bảng 15 loại field rồi sinh 2–3 TC cho xong** — Password có 9 mục, Email có 9 mục; sinh 3 TC là trượt Gate #4 dù vẫn qua sàn `1 positive + 2 negative`
+- ❌ **Chấm `➖` cho `UI cơ bản` / `Validation` / `Permission`** — ba nhánh này không bao giờ ngoài phạm vi khi điều kiện kích hoạt đã thoả
+- ❌ **Ghi `➖` trơn không lý do, không tên người/đội chịu trách nhiệm** — biến "đã thống nhất không test" thành "QA quên test", đúng thứ bảng này sinh ra để chống
+- ❌ **Hỏi lại user về quyền API / CSDL / nhật ký ở từng module** — đó là thuộc tính cấp dự án, đọc dòng `Năng lực kiểm thử của QA` ở `docs/requirements/README.md`; chưa có thì hỏi **một lần** rồi ghi vào đó ngay
+- ❌ **Chạy đủ 4 vòng cho chức năng rủi ro Thấp** — bơm 50 TC cho một trang tĩnh chỉ hiển thị là lãng phí công viết, công chạy, công bảo trì, và làm loãng bộ TC thật. Chấm mức rủi ro trước, chọn độ sâu tương ứng
+- ❌ **Rút gọn bằng cách bỏ Vòng 1** — V1 là thứ duy nhất trả lời "chức năng này có chạy được không". Rủi ro Thấp vẫn phải đủ 6 nhánh V1
+- ❌ **Chấm `Thấp` cho chức năng có field nhập** — có ô nhập là có người nhập sai. Thiếu một trong bốn điều kiện là không được chấm Thấp
+- ❌ **Dùng `➖` thay cho `⏭️`** — `➖` nghĩa là hệ thống không có thứ đó, `⏭️` nghĩa là có nhưng cố ý không kiểm. Ghi nhầm là **giấu một quyết định chấp nhận rủi ro**
+- ❌ **Ghi `⏭️` mà không có điều kiện rà lại** — quyết định rút gọn phải **tự hết hạn** khi chức năng lớn lên, nếu không nó thành lỗ hổng bị quên vĩnh viễn
+- ❌ **Sinh TC chỉ để lấp ô bảng 4 vòng** — TC rác làm loãng bộ TC thật, vi phạm đúng luật đã áp cho bảng ISO 25010
+- ❌ **Gộp mà không công bố số biến thể** — Bảng Đối Soát Coverage đếm theo REQ nên không bắt được việc rụng biến thể
+- ❌ **DELTA sửa xong Vòng 2 rồi dừng** — ticket thêm field mà chỉ sửa TC validation, quên cập nhật bảng kiểm thành phần màn hình ở `V1 · UI cơ bản`. Bộ TC thành ra mô tả một màn hình không còn tồn tại
+- ❌ **DELTA rà lại toàn bộ bảng 4 vòng của cả module** — chỉ chấm lại nhánh ticket chạm tới; rà cả module là làm việc của `/generate-testcases-manual-rbt` và dễ kéo theo sửa ngoài phạm vi đã duyệt
 
 ---
 
@@ -1083,6 +1370,7 @@ Vì vậy Mode DELTA đặt việc **bảo toàn TC ID** lên trên mọi mục 
 | Bảng Đối Soát Coverage | Mỗi REQ ID × số TC × đủ Positive/Negative/Boundary (tiêu chí 6) |
 | **Bảng Đối Soát Evidence** | Mỗi ảnh × màn hình/trạng thái × TC dựa vào × đầy đủ hay cắt cụt (tiêu chí 7) |
 | **Vùng chưa có evidence** | Danh sách màn hình/trạng thái không có ảnh chống lưng + TC bị gắn `@NeedsVerify` |
+| **Bảng Đối soát loại kiểm thử (4 vòng)** | Mọi nhánh của V1–V4 × ✅/➖/🔴 × TC ID (kèm số biến thể nếu GỘP) hoặc lý do + ai chịu (tiêu chí 10) |
 | **Bảng rà soát đặc tính chất lượng** | 9 đặc tính ISO/IEC 25010:2023 × ✅/➖/🔴 × TC ID hoặc lý do (tiêu chí 9) |
 
 ### Mode FULL RBT
@@ -1092,9 +1380,9 @@ Vì vậy Mode DELTA đặt việc **bảo toàn TC ID** lên trên mọi mục 
 | 1 | Xác nhận bối cảnh + **Danh mục Evidence đã mở** |
 | 2 | Luồng + Ambiguities + Câu hỏi Q&A (gồm xung đột tài liệu ↔ evidence) |
 | 3 | Module Decomposition + Dependencies |
-| 4 | Traceability Matrix + High-Level Scenarios |
-| 5 | Test Cases chi tiết (REQ ID + Risk Level + Test Data) |
-| 6 | Bảng Markdown chuẩn (Jira/Excel ready) + Bảng Đối Soát Coverage + **Bảng Đối Soát Evidence** + **Bảng rà soát đặc tính chất lượng (ISO/IEC 25010:2023)** |
+| 4 | Traceability Matrix + High-Level Scenarios **xếp theo 4 vòng** (mỗi nhánh chấm sơ bộ ✅/➖) |
+| 5 | Test Cases chi tiết (REQ ID + Risk Level + Test Data), sinh **tuần tự V1 → V4** |
+| 6 | Bảng Markdown chuẩn (Jira/Excel ready) + Bảng Đối Soát Coverage + **Bảng Đối Soát Evidence** + **Bảng Đối soát loại kiểm thử (4 vòng)** + **Bảng rà soát đặc tính chất lượng (ISO/IEC 25010:2023)** |
 
 ### Mode CHECKLIST
 
@@ -1114,10 +1402,11 @@ Vì vậy Mode DELTA đặt việc **bảo toàn TC ID** lên trên mọi mục 
 | Output | Mô tả |
 |--------|--------|
 | `impact/impact_plan_<TICKET-ID>.md` | Bảng ánh xạ REQ → TC (✅ chắc chắn / ⚠️ suy luận / ❓ chưa có TC) + kế hoạch sửa từng TC + tác động lan toả |
-| `test_cases_<module>.md` đã sửa | Sửa **tại chỗ**, tên file không đổi, TC ID giữ nguyên |
-| `archive/test_cases_<module>_v<N>.md` | Bản trước khi sửa — để đối chiếu |
-| Nhật ký thay đổi | Bảng ở cuối file TC: ngày · ticket · TC bị ảnh hưởng · thay đổi · bản sao lưu |
-| **Delta TC List** | Hiển thị trong chat — input trực tiếp cho `/update-automation-from-impact` |
+| File nền tảng đã sửa (+ index cập nhật) | Sửa **tại chỗ**, tên file không đổi, TC ID giữ nguyên |
+| `archive/test_cases_<module>_<nền-tảng>_v<N>.md` | Bản trước khi sửa — để đối chiếu |
+| **Bảng Đối soát loại kiểm thử (4 vòng)** | Cập nhật **chỉ nhánh ticket chạm tới** ở cuối index — phần còn lại giữ nguyên |
+| Nhật ký thay đổi | Bảng ở cuối file TC: ngày · ticket · TC bị ảnh hưởng · **vòng · nhánh** · thay đổi · bản sao lưu |
+| **Delta TC List** | Hiển thị trong chat, có cột **Vòng · Nhánh** — input trực tiếp cho `/update-automation-from-impact` |
 | Danh sách ngoài phạm vi | REQ 🟢 chưa có TC + command tiếp theo |
 
 Tất cả output phải bằng **Tiếng Việt**, format **Markdown**, và tuân thủ **Quy Tắc Xuất File & Theo Dõi Tiến Độ**: ghi thẳng vào file (`docs/testcases/` hoặc `docs/checklists/`), chat chỉ hiện tiến độ + Bảng Đối Soát Coverage + tóm tắt đường dẫn file.

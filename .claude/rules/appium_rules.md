@@ -86,6 +86,7 @@ driver.findElement(AppiumBy.iOSClassChain(
 - **Real device** cần WebDriverAgent đã ký (`xcodeOrgId`, `xcodeSigningId`, `updatedWDABundleId`) — chưa ký thì phiên không mở được, lỗi này **không** phải lỗi locator
 - Dialog xin quyền: `autoAcceptAlerts: true` (hoặc `autoDismissAlerts`) trong capabilities
 - Chạy song song nhiều device: mỗi device một `wdaLocalPort` riêng — xem mục 8
+- **iOS (simulator lẫn máy thật) chỉ chạy được trên macOS.** Máy Windows / Linux phải dùng Appium server trên Mac hoặc dịch vụ cloud
 
 ---
 
@@ -281,6 +282,6 @@ public class LoginMobileTest extends BaseTest {
 | **Xoay màn hình** | `driver.rotate(ScreenOrientation.LANDSCAPE)` — test nếu app hỗ trợ |
 | **Background → foreground** | `driver.runAppInBackground(Duration.ofSeconds(5))` — kiểm state có giữ không |
 | **Dialog xin quyền** | Android: `autoGrantPermissions: true` · iOS: `autoAcceptAlerts: true` |
-| **Mất mạng giữa chừng** | Bật/tắt network, kiểm app báo lỗi tử tế hay crash |
+| **Mất mạng giữa chừng** | Android: `mobile: setConnectivity` (UiAutomator2 — tắt wifi/data) · iOS: không có API, cần thiết bị có Network Link Conditioner hoặc người bật chế độ máy bay. Kiểm app báo lỗi tử tế hay crash |
 | **Bàn phím che input** | Ẩn bàn phím trước khi tìm element bên dưới |
 | **Push notification** | Verify qua notification listener |

@@ -29,7 +29,7 @@ skills:
 ## Các bước thực hiện
 
 ### Bước 1: Thu thập Response Mẫu
-1. Nếu có Swagger → đọc schema của từng endpoint
+1. Nếu có Swagger → đọc schema của từng endpoint — dùng snapshot ở `_discovery/sources/` nếu đã có; chưa có thì lấy spec bản gốc theo skill `skills-requirements-analyzer` mục 3.4.1 (tải thô bằng `curl`, trang Swagger UI/Scalar là renderer không phải spec)
 2. Nếu app chạy được → mở browser (Playwright MCP: `navigate → wait_for(page_load)`), thao tác UI, capture response thật từ network
 3. Lưu response mẫu làm baseline cho mock
 

@@ -22,7 +22,7 @@ Chạy bộ manual test cases trực tiếp trên browser thật, đối chiếu
 
 | Input | Bắt buộc? | Ghi chú |
 |---|---|---|
-| File TC hoặc checklist | ⭐ Bắt buộc | VD `docs/testcases/customers/parts/part_01_danh_sach.md` |
+| File TC hoặc checklist | ⭐ Bắt buộc | VD `docs/testcases/customers/web/test_cases_customers_web.md` · `docs/testcases/customers/web/parts/part_01_web_danh_sach.md`. User đưa file **index** → đọc `## Bản đồ tài liệu`, chỉ lấy file `web/` |
 | Phạm vi chạy | ⭐ Bắt buộc | Toàn bộ · theo tag (`@Smoke`) · theo TC ID range · theo nhóm chức năng. **Không có → agent hỏi**, không tự chạy hết |
 | URL & tài khoản | ⭐ Bắt buộc | Môi trường đang test + tài khoản đăng nhập |
 | Môi trường dùng chung? | ⭐ Bắt buộc | Có → bật auto-skip TC phá huỷ; Không → chạy đầy đủ, ghi rõ trong report |
@@ -42,8 +42,8 @@ Chạy bộ manual test cases trực tiếp trên browser thật, đối chiếu
 
 ### Bước 2: Chuẩn bị
 1. Tạo `run_id` dạng `run_<timestamp>`
-2. Tạo thư mục evidence `docs/executions/<module>/<run_id>/evidence/`
-3. Khởi tạo file report `docs/executions/<module>/<run_id>/execution_report.md` với phần header
+2. Tạo thư mục evidence `docs/executions/<module>/<nền-tảng>/<run_id>/evidence/` — `<nền-tảng>` là nền tảng của file TC đang chạy. Workflow này chạy trên **trình duyệt** nên là `web`; TC `@Android` / `@iOS` / `@API` không chạy ở đây
+3. Khởi tạo file report `docs/executions/<module>/<nền-tảng>/<run_id>/execution_report.md` với phần header
 
 ### Bước 3: Khởi tạo browser & đăng nhập
 1. `browser_navigate(url)`

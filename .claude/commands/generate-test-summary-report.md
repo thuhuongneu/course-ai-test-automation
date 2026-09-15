@@ -43,7 +43,7 @@ Glob theo bảng Input của skill, **ghi lại đường dẫn từng file** đ
 
 1. `docs/executions/*/run_*/execution_report.md` — kết quả manual từng module
 2. `docs/executions/*/retest_*/retest_report.md` — bug đã verify + regression phát sinh
-3. `docs/bugs/README.md` (danh mục) rồi `docs/bugs/<module>/BUG_*.md` — đọc `Severity`, `Lịch sử retest` để biết bug nào còn mở
+3. `docs/bugs/README.md` (danh mục) rồi `docs/bugs/<module>/<nền-tảng>/BUG_*.md` — đọc `Severity`, `Lịch sử retest` để biết bug nào còn mở
 4. `docs/requirements/README.md` — **bắt buộc**, lấy module còn ⬜/🟨/⏸️
 5. `traceability_matrix.md` — nếu có
 6. `reports/` — kết quả automation, nếu có

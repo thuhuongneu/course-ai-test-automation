@@ -71,7 +71,7 @@ Mỗi tiêu chí chấm **Đạt / Không đạt / Không áp dụng**, kèm s�
 |---|---|---|
 | `docs/executions/*/run_*/execution_report.md` | PASS/FAIL/BLOCKED/SKIPPED từng module | ✅ |
 | `docs/executions/*/retest_*/retest_report.md` | Bug đã verify fix · regression phát sinh | Nếu có |
-| `docs/bugs/README.md` + `docs/bugs/<module>/BUG_*.md` | Bug đang mở theo Severity · Lịch sử retest | ✅ |
+| `docs/bugs/README.md` + `docs/bugs/<module>/<nền-tảng>/BUG_*.md` | Bug đang mở theo Severity · Lịch sử retest | ✅ |
 | `docs/requirements/README.md` | **Module chưa recon** — vùng mù, mục 1 của báo cáo | ✅ |
 | `traceability_matrix.md` | Độ phủ REQ ↔ TC ↔ Automation | Nếu có |
 | Report automation trong `reports/` | Kết quả suite tự động | Nếu có |
@@ -164,11 +164,14 @@ Báo cáo này tương ứng với **ISO/IEC/IEEE 29119-3 — Test Completion Re
 
 ## 4. Kết quả kiểm thử theo module
 
-| Module | Tổng TC | ✅ PASS | ❌ FAIL | ⚠️ BLOCKED | ⏭️ SKIP | Pass rate | Nguồn |
-|---|---|---|---|---|---|---|---|
-| Khách hàng | 36 | 30 | 3 | 1 | 2 | 88.2% | [run_1785700456](docs/executions/customers/run_1785700456/execution_report.md) |
-| Đăng nhập | 18 | 18 | 0 | 0 | 0 | 100% | [run_1785612000](…) |
-| **Tổng** | **54** | **48** | **3** | **1** | **2** | **92.3%** | |
+| Module | Nền tảng | Tổng TC | ✅ PASS | ❌ FAIL | ⚠️ BLOCKED | ⏭️ SKIP | Pass rate | Nguồn |
+|---|---|---|---|---|---|---|---|---|
+| Khách hàng | Web | 36 | 30 | 3 | 1 | 2 | 88.2% | [run_1785700456](docs/executions/customers/web/run_1785700456/execution_report.md) |
+| Khách hàng | Mobile | 12 | 11 | 1 | 0 | 0 | 91.7% | [run_1785790000](…) |
+| Đăng nhập | Web | 18 | 18 | 0 | 0 | 0 | 100% | [run_1785612000](…) |
+| **Tổng** | | **66** | **59** | **4** | **1** | **2** | **92.2%** | |
+
+> Mỗi dòng là **một module × một nền tảng** — lấy lần chạy mới nhất trong `docs/executions/<module>/<nền-tảng>/`. Module khai có nền tảng mà chưa có lần chạy nào ở nền tảng đó → vẫn ghi dòng, cột kết quả `—`, và đưa vào rủi ro: *chưa kiểm trên <nền tảng>*.
 
 > Pass rate = PASS / (PASS + FAIL + BLOCKED). SKIPPED không tính vào mẫu số nhưng vẫn là **nợ kiểm thử** ở mục 2.
 

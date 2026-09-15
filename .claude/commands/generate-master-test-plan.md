@@ -247,7 +247,7 @@ Kiểm thử đợt <mốc> nhằm xác nhận <mục tiêu nghiệp vụ>, đ�
 |---|---|---|
 | Tài liệu requirements | `docs/requirements/<module>/` | `/generate-requirements-from-website` |
 | Test cases | `docs/testcases/<module>/` | `/generate-testcases-manual-rbt` |
-| Execution report | `docs/executions/<module>/run_*/` | `/execute-test-cases` |
+| Execution report | `docs/executions/<module>/<nền-tảng>/run_*/` | `/execute-test-cases` |
 | Bug report | `docs/bugs/<module>/` | `/create-bug-report` |
 | Ma trận truy vết | `traceability_matrix.md` | `/generate-traceability-matrix` |
 | **Báo cáo tổng hợp** | `docs/executions/test_summary_*.md` | `/generate-test-summary-report` |

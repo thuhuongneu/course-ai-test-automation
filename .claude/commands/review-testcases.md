@@ -41,7 +41,7 @@ skills:
 ## Các bước thực hiện
 
 ### Bước 1: Đọc Input
-1. Đọc file TC, xác định format và số lượng
+1. Đọc file TC, xác định format và số lượng. File **index** `test_cases_<module>.md` → theo `## Bản đồ tài liệu` đọc các file nền tảng (index không chứa dòng TC); chấm riêng từng nền tảng khi chúng khác người viết/khác độ phủ
 2. Đọc requirements (nếu có)
 
 ### Bước 2: Review Từng TC
@@ -50,9 +50,14 @@ skills:
 3. Với mỗi TC 🔴/🟡: trích nguyên văn chỗ chưa đạt + viết đề xuất sửa cụ thể
 
 ### Bước 3: Phân Tích Mức Bộ TC
-1. Coverage gaps: happy path / negative / boundary / edge cases còn thiếu (liệt kê kịch bản cụ thể)
-2. TC trùng lặp → đề xuất merge
-3. Kiểm tra priority có hợp lý không
+1. **Đối soát 4 vòng (BẮT BUỘC)** — duyệt mọi nhánh của **Bản Đồ Loại Kiểm Thử — 4 Vòng** trong `skills-rbt-manual-testing`, chấm `✅` / `🟡 nông` / `🔴 thiếu` / `➖ không áp dụng (lý do)`. Soi kỹ ba nhánh hay mất nhất: `UI cơ bản` (V1), `Validation` (V2), `Permission` (V3)
+2. **Đối soát bảng 15 loại field** — với TỪNG field, so từng mục của dòng loại field tương ứng với TC thực có; thiếu mục nào nêu đích danh mục đó
+3. Coverage gaps: liệt kê kịch bản cụ thể, **ghi kèm vòng/nhánh** tương ứng — không ghi "thiếu negative case" suông
+4. TC trùng lặp → đề xuất merge
+5. Độ hạt GỘP → **đếm số biến thể**; tổng biến thể ít bất thường = đã rụng case dù REQ vẫn phủ đủ
+6. Kiểm tra priority có hợp lý không
+
+> 🚨 Rubric 6 tiêu chí ở Bước 2 chấm **cách viết từng TC** — một bộ TC thiếu hẳn lớp giao diện vẫn có thể 🟢 toàn bộ. Bước 3 là chỗ **duy nhất** bắt được điều đó. Bỏ qua mục 1 và 2 thì báo cáo sẽ xác nhận sai rằng bộ TC đã ổn.
 
 ### Bước 4: Báo Cáo (CHECKPOINT)
 1. Xuất `testcase_review_report.md` theo template trong skill
@@ -61,12 +66,12 @@ skills:
 ### Bước 5: Sửa TC (Mode FIX — chỉ khi user xác nhận)
 1. Sinh file mới `<tên_file_gốc>_improved.<ext>` với các TC đã cải thiện
 2. TC 🟢 giữ nguyên; TC 🟡 sửa theo đề xuất; TC 🔴 viết lại (tuân thủ chuẩn `skills-rbt-manual-testing`)
-3. Bổ sung TC mới cho coverage gaps ưu tiên High (nếu user đồng ý)
+3. Bổ sung TC mới cho coverage gaps ưu tiên High (nếu user đồng ý) — TC bổ sung phải tuân thủ **Bản Đồ Loại Kiểm Thử — 4 Vòng** và **Bảng Field-Level Validation Checklist**, đặt vào đúng nhánh đã báo thiếu
 
 ## Output
 
 ### Mode REVIEW
-- File `testcase_review_report.md`: điểm từng TC, vấn đề + đề xuất sửa, coverage gaps, TC trùng lặp, khuyến nghị
+- File `testcase_review_report.md`: điểm từng TC, vấn đề + đề xuất sửa, **Bảng đối soát loại kiểm thử (4 vòng)**, coverage gaps (kèm vòng/nhánh), TC trùng lặp, khuyến nghị
 
 ### Mode FIX
 - Tất cả output của Mode REVIEW, cộng thêm:

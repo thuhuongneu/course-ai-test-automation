@@ -53,7 +53,7 @@ skills-rbt-manual-testing          skills-manual-test-executor          skills-b
 
 | Input | Bắt buộc? | Ghi chú |
 |---|---|---|
-| File TC hoặc checklist | ⭐ Bắt buộc | VD `docs/testcases/customers/parts/part_01_danh_sach.md` |
+| File TC hoặc checklist | ⭐ Bắt buộc | VD `docs/testcases/customers/web/test_cases_customers_web.md` · `docs/testcases/customers/web/parts/part_01_web_danh_sach.md`. User đưa file **index** → đọc `## Bản đồ tài liệu`, chỉ lấy file `web/` |
 | Phạm vi chạy | ⭐ Bắt buộc | Toàn bộ file · theo tag (`@Smoke`) · theo TC ID range · theo nhóm chức năng |
 | Môi trường & tài khoản | ⭐ Bắt buộc | URL, tài khoản đăng nhập, build/version đang test |
 | Mức độ dùng chung của môi trường | ⭐ Bắt buộc | Dùng chung → bật auto-skip TC phá huỷ; môi trường riêng → có thể chạy đầy đủ |
@@ -146,7 +146,7 @@ Khi một TC FAIL:
 | Milestone quan trọng (tạo bản ghi thành công, hoàn tất luồng chính) | ✅ Nên chụp |
 | Mỗi bước của mọi TC | ❌ **KHÔNG** — chụp tràn lan làm report nặng và khó đọc |
 
-Lưu tại: `docs/executions/<module>/<run_id>/evidence/<TC_ID>_<mô_tả>.png`
+Lưu tại: `docs/executions/<module>/<nền-tảng>/<run_id>/evidence/<TC_ID>_<mô_tả>.png`
 
 ---
 
@@ -171,7 +171,7 @@ Lưu tại: `docs/executions/<module>/<run_id>/evidence/<TC_ID>_<mô_tả>.png`
 
 ## Output — Execution Report
 
-File: `docs/executions/<module>/<run_id>/execution_report.md`
+File: `docs/executions/<module>/<nền-tảng>/<run_id>/execution_report.md`
 
 ```markdown
 # Execution Report — <Module> · <Loại chạy>
@@ -179,6 +179,7 @@ File: `docs/executions/<module>/<run_id>/execution_report.md`
 | Thông tin | Nội dung |
 |---|---|
 | Run ID | run_1785700456 |
+| Nền tảng | `web` — một lần chạy thuộc đúng một nền tảng, quyết định thư mục `docs/executions/<module>/<nền-tảng>/` |
 | Nguồn TC | docs/testcases/customers/parts/part_01_danh_sach.md |
 | Phạm vi | 36 TC (toàn bộ Part 1) |
 | Môi trường | `<URL môi trường test>` — `<Staging/UAT/Production>` |

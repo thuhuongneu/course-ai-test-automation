@@ -82,7 +82,7 @@ public static class Ax {
     static extern uint SendInput(uint n, INPUT[] inputs, int size);
 
     const uint INPUT_KEYBOARD = 1, KEYEVENTF_KEYUP = 0x0002, KEYEVENTF_UNICODE = 0x0004;
-    const ushort VK_BACK = 0x08, VK_END = 0x23;
+    const ushort VK_BACK = 0x08, VK_END = 0x23, VK_RETURN = 0x0D;
 
     /// Do sau toi da khi duyet cay semantics. Cay sau hon muc nay thi element se bien mat
     /// am tham - de o mot cho de con sua khi app doi bo cuc.
@@ -310,7 +310,15 @@ public static class Ax {
     public static void Click(IntPtr hwnd, AxNode n) {
         EnsureForeground(hwnd);
         int cx = n.L + n.W / 2, cy = n.T + n.H / 2;   // toa do LAY TU ELEMENT, khong hardcode
-        SetCursorPos(cx, cy);
+        ClickAt(hwnd, cx, cy);
+    }
+
+    /// Click theo toa do tuyet doi tren man hinh - chi dung khi element KHONG lo ra duoc qua
+    /// accessibility tree (vd hang cua mot DataTable Flutter ao hoa, semantics khong populate
+    /// children). Uu tien Click(hwnd, AxNode) o moi noi khac.
+    public static void ClickAt(IntPtr hwnd, int x, int y) {
+        EnsureForeground(hwnd);
+        SetCursorPos(x, y);
         System.Threading.Thread.Sleep(120);
         mouse_event(0x0002, 0, 0, 0, IntPtr.Zero);    // LEFTDOWN
         mouse_event(0x0004, 0, 0, 0, IntPtr.Zero);    // LEFTUP
@@ -329,6 +337,14 @@ public static class Ax {
         i[0].type = INPUT_KEYBOARD; i[0].u.ki.wVk = vk;
         i[1].type = INPUT_KEYBOARD; i[1].u.ki.wVk = vk; i[1].u.ki.dwFlags = KEYEVENTF_KEYUP;
         SendInput(2, i, Marshal.SizeOf(typeof(INPUT)));
+    }
+
+    /// Go phim Enter - dung cho o "search or scan product" (thiet ke cho may quet ma vach, may
+    /// quet luon gui Enter o cuoi chuoi de submit tim kiem; go tay qua fill() khong tu submit).
+    public static void PressEnter(IntPtr hwnd) {
+        EnsureForeground(hwnd);
+        SendVk(VK_RETURN);
+        System.Threading.Thread.Sleep(300);
     }
 
     /// Xoa sach roi go text.
@@ -572,6 +588,19 @@ public static class Program {
                         IntPtr h = Hwnd();
                         Ax.EnsureForeground(h);
                         Ax.Click(h, RoleAt(h, p[1], int.Parse(p[2], CultureInfo.InvariantCulture)));
+                        End(true, "clicked");
+                        break;
+                    }
+
+                    case "pressEnter": {
+                        Ax.PressEnter(Hwnd());
+                        End(true, "enter pressed");
+                        break;
+                    }
+
+                    case "clickAt": {
+                        Ax.ClickAt(Hwnd(), int.Parse(p[1], CultureInfo.InvariantCulture),
+                            int.Parse(p[2], CultureInfo.InvariantCulture));
                         End(true, "clicked");
                         break;
                     }

@@ -55,4 +55,13 @@ public class SelectRegisterScreen {
   public void logout() {
     updatePrompt.runResilient(() -> driver.clickByName(BTN_LOGOUT));
   }
+
+  /**
+   * Chon terminal/quay theo ten (vi du "THF01") - moi terminal la mot PUSHBUTTON rieng, gom theo
+   * tung cua hang. Chon xong vao thang man hinh ban hang cua terminal do (xem TerminalScreen).
+   */
+  @Step("Chọn terminal: {terminalName}")
+  public void selectTerminal(String terminalName) {
+    updatePrompt.runResilient(() -> driver.clickByName(terminalName));
+  }
 }

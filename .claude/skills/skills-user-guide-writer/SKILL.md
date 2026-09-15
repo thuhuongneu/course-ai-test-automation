@@ -63,7 +63,7 @@ Hướng dẫn sử dụng sai **nguy hiểm hơn** requirements sai: người d
 
 | Nguồn | Ghi chú |
 |---|---|
-| Một tấm ảnh trong `docs/requirements/<module>/evidence/` | Mở ảnh ra xem thật, không đọc tên file rồi đoán |
+| Một tấm ảnh trong `docs/requirements/<module>/<nền-tảng>/evidence/` | Mở ảnh ra xem thật, không đọc tên file rồi đoán |
 | Một dòng REQ trong `requirements_<module>.md` | Dẫn được REQ ID |
 | Một lần thao tác thật qua Playwright MCP trong phiên này | Mode FULL |
 
@@ -165,7 +165,7 @@ Một khái niệm — **một** từ, xuyên suốt tài liệu. Chọn từ **
 | Ảnh đặt **ngay dưới** bước nó minh hoạ | Ảnh gom cuối mục thì người dùng không biết nó ứng với bước nào |
 | Không cần ảnh cho mọi bước — chỉ nơi **khó tìm** (menu lồng nhau, nút nhỏ, trạng thái đặc biệt) | Ảnh cho bước hiển nhiên làm loãng tài liệu và tăng chi phí bảo trì khi UI đổi |
 | Ảnh lưu tại `docs/user-guides/<module>/images/`, tên theo việc: `them-khach-hang-buoc-2.png` | Tên theo việc thì đổi UI biết ngay phải chụp lại tấm nào |
-| Dùng lại ảnh từ `requirements/<module>/evidence/` **chỉ khi** ảnh đó đúng phạm vi và không chứa dữ liệu thật | Ảnh recon chụp để chứng minh REQ, mục đích khác — thường thừa và thường có dữ liệu thật |
+| Dùng lại ảnh từ `requirements/<module>/<nền-tảng>/evidence/` **chỉ khi** ảnh đó đúng phạm vi và không chứa dữ liệu thật | Ảnh recon chụp để chứng minh REQ, mục đích khác — thường thừa và thường có dữ liệu thật |
 
 ---
 

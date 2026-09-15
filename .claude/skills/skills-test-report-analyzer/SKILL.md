@@ -39,8 +39,8 @@ Sử dụng skill này khi:
 
 | Nguồn | Format | Vị trí |
 |---|---|---|
-| `/execute-test-cases` | Markdown | `docs/executions/<module>/run_*/execution_report.md` |
-| `/retest-fixed-bugs` | Markdown | `docs/executions/<module>/retest_*/retest_report.md` |
+| `/execute-test-cases` | Markdown | `docs/executions/<module>/<nền-tảng>/run_*/execution_report.md` |
+| `/retest-fixed-bugs` | Markdown | `docs/executions/<module>/<nền-tảng>/retest_*/retest_report.md` |
 
 ⚠️ **Không áp bảng Failure Categories của automation cho report manual.** Report manual **không có** stack trace, không có retry, không có tên page object — mọi tín hiệu dùng để phân loại failure của automation đều vắng mặt. Dùng bảng riêng ở mục **Phân tích Report Manual**.
 
@@ -124,7 +124,7 @@ Mục 5 của report có dòng `Đã xoá? ❌` → cảnh báo ngay. Môi trư�
 
 ### So sánh trend giữa các lần chạy
 
-Glob `docs/executions/<module>/run_*/execution_report.md`, sắp theo Run ID (timestamp tăng dần), so **cùng TC ID** giữa các lần:
+Glob `docs/executions/<module>/<nền-tảng>/run_*/execution_report.md` (và `docs/executions/<module>/run_*/` của lần chạy cũ chưa có tầng nền tảng), sắp theo Run ID (timestamp tăng dần), so **cùng TC ID** giữa các lần — trend tính **riêng từng nền tảng**:
 
 | Nhóm | Nghĩa | Ưu tiên |
 |---|---|---|

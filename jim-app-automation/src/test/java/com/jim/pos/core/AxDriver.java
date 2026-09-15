@@ -259,9 +259,35 @@ public class AxDriver implements AutoCloseable {
     require("clickName", escape(name));
   }
 
+  /**
+   * Click element theo role va vi tri (0-based, sap xep theo vi tri tren man hinh) - dung khi
+   * ten element dong (chua gia tien, so luong...) nen khong the click theo ten co dinh duoc.
+   */
+  public void clickByRole(String role, int index) {
+    require("clickRole", role, String.valueOf(index));
+  }
+
   /** Xoa sach o nhap roi go {@code text} vao do. */
   public void fill(String role, int index, String text) {
     require("fill", role, String.valueOf(index), escape(text));
+  }
+
+  /**
+   * Go phim Enter - can cho o "search or scan product"/"search order": thiet ke cho may quet
+   * ma vach (may quet luon gui Enter o cuoi chuoi de submit), go tay qua {@link #fill} khong tu
+   * submit duoc.
+   */
+  public void pressEnter() {
+    require("pressEnter");
+  }
+
+  /**
+   * Click theo toa do tuyet doi tren man hinh - CHI dung khi element khong lo ra duoc qua
+   * accessibility tree (vd hang cua mot bang ket qua Flutter DataTable, semantics khong populate
+   * children). Uu tien {@link #clickByName} hoac {@link #clickByRole} o moi noi khac.
+   */
+  public void clickAt(int x, int y) {
+    require("clickAt", String.valueOf(x), String.valueOf(y));
   }
 
   /**

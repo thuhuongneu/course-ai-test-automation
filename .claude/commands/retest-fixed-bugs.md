@@ -33,7 +33,7 @@ Workflow này đóng **vòng lặp cuối** của quy trình kiểm thử: dev b
 
 | Cần có | Nguồn | Bắt buộc |
 |---|---|---|
-| Bug cần retest | File `docs/bugs/<module>/BUG_*.md`, hoặc Jira key qua `/fetch-jira-requirements` | ✅ |
+| Bug cần retest | File `docs/bugs/<module>/<nền-tảng>/BUG_*.md`, hoặc Jira key qua `/fetch-jira-requirements` | ✅ |
 | **Build / version mới** | User cung cấp | ✅ |
 | Môi trường + tài khoản | `.env` hoặc user | ✅ |
 | Môi trường dùng chung? | User — bật quy tắc auto-skip của skill executor | ✅ |
@@ -111,8 +111,8 @@ Chạy nhóm TC đã chọn theo đúng quy trình `skills-manual-test-executor`
 
 ## Bước 4: Xuất Retest Report
 
-File: `docs/executions/<module>/retest_<timestamp>/retest_report.md`
-Evidence: `docs/executions/<module>/retest_<timestamp>/evidence/`
+File: `docs/executions/<module>/<nền-tảng>/retest_<timestamp>/retest_report.md` — `<nền-tảng>` lấy theo thư mục của bug (`docs/bugs/<module>/<nền-tảng>/`). Bug cũ nằm thẳng ở `docs/bugs/<module>/` → nền tảng lấy từ dòng `Môi trường` của bug
+Evidence: `docs/executions/<module>/<nền-tảng>/retest_<timestamp>/evidence/`
 
 ```markdown
 # Retest Report — <Module> · Build <version>
@@ -191,7 +191,7 @@ Evidence: `docs/executions/<module>/retest_<timestamp>/evidence/`
 
 ## Bước 5: Cập nhật bug report gốc
 
-Thêm mục **Lịch sử retest** vào cuối file `docs/bugs/<module>/BUG_*.md` (template ở `skills-bug-reporter`). **Thêm dòng mới lên đầu bảng**, không sửa nội dung cũ:
+Thêm mục **Lịch sử retest** vào cuối file `docs/bugs/<module>/<nền-tảng>/BUG_*.md` (template ở `skills-bug-reporter`). **Thêm dòng mới lên đầu bảng**, không sửa nội dung cũ:
 
 ```markdown
 ## Lịch sử retest

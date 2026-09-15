@@ -20,7 +20,8 @@ Module đang phát triển thì ticket liên tục sửa/bổ sung yêu cầu. W
 > **KHÔNG dùng workflow này khi:**
 > | Tình huống | Dùng thay thế |
 > |---|---|
-> | Module **chưa có** tài liệu requirements | `/generate-requirements-from-website` hoặc `/analyze-requirement-document` |
+> | Module **chưa có** tài liệu requirements | `/generate-requirements-from-website` (web) · `/generate-requirements-from-mobile` (app) · `/generate-requirements-from-api` (API) · hoặc `/analyze-requirement-document` |
+> | **Spec API đổi phiên bản** (không có ticket) | `/generate-requirements-from-api` — tự chạy delta khi `sha256` spec khác snapshot |
 > | Chỉ cần phân tích ticket, chưa muốn động vào tài liệu module | `/analyze-requirement-document` |
 > | Cần sinh lại test case sau khi cập nhật | `/generate-testcases-manual-rbt` (chỉ cho REQ 🟡/🟢 mới) |
 
@@ -166,7 +167,7 @@ Nội dung file:
 
 | Tình huống | Workflow |
 |---|---|
-| Trước đó — tạo tài liệu module lần đầu | `/generate-requirements-from-website` |
+| Trước đó — tạo tài liệu module lần đầu | `/generate-requirements-from-website` (web) · `/generate-requirements-from-mobile` (app) · `/generate-requirements-from-api` (API) |
 | Trước đó — phân tích ticket độc lập, chưa merge vào module | `/analyze-requirement-document` |
 | Sau đó — **cập nhật TC bị ảnh hưởng (🟡) + archive TC bị gỡ (🗑️)** | `/update-testcases-from-impact` ⭐ mắt xích kế tiếp |
 | Sau đó — sinh TC cho REQ mới (🟢) | `/generate-testcases-manual-rbt` hoặc `/generate-testcases-from-requirements` |

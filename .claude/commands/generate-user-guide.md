@@ -59,7 +59,7 @@ Tài liệu để **người dùng cuối làm được việc**, không phải 
 
 1. `docs/requirements/README.md` — xác nhận module đã recon (⬜ Chưa recon → **dừng**, đề nghị chạy `/generate-requirements-from-website` trước)
 2. `docs/requirements/<module>/requirements_<module>.md` — luồng, trường bắt buộc, thông báo, ma trận phân quyền
-3. **Mở 100% ảnh** trong `docs/requirements/<module>/evidence/` — nhìn thật, không đọc tên file rồi đoán
+3. **Mở 100% ảnh** trong `docs/requirements/<module>/<nền-tảng>/evidence/` — nhìn thật, không đọc tên file rồi đoán
 4. Ghi lại: nhãn nút/menu **nguyên văn**, thông báo **nguyên văn**, trường bắt buộc, thao tác không hồi lại được (→ cảnh báo ⚠️)
 
 > Requirements ghi có tính năng nhưng không ảnh nào cho thấy nó → **không viết**, đưa vào mục 6.

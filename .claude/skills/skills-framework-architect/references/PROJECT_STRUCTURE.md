@@ -3,7 +3,7 @@
 > **📍 NGUỒN DUY NHẤT** của project structure. Mọi thay đổi cấu trúc thư mục chỉ sửa ở file này — không sao chép sang nơi khác.
 
 **Skill:** `skills-framework-architect`
-**Workflow dùng file này:** `/generate-automation-framework` · `/generate-automation-from-testcases` · `/generate-automation-from-ui-flow`
+**Workflow dùng file này:** `/generate-automation-framework` · `/generate-automation-web` · `/generate-automation-mobile` · `/generate-automation-api` (và bộ định tuyến `/generate-automation-from-testcases`)
 
 ---
 

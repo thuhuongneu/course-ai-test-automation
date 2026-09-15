@@ -25,7 +25,7 @@ Hai nguồn report khác nhau về bản chất; chọn nhầm nhánh là phân 
 | Nhánh | Nguồn | Nhận biết |
 |---|---|---|
 | **AUTOMATION** | Playwright JSON · Allure · JUnit/Surefire XML · TestNG XML | File trong `reports/`, đuôi `.json` / `.xml` / `.html` |
-| **MANUAL** | `/execute-test-cases` · `/retest-fixed-bugs` | File `.md` trong `docs/executions/<module>/run_*/` hoặc `retest_*/` |
+| **MANUAL** | `/execute-test-cases` · `/retest-fixed-bugs` | File `.md` trong `docs/executions/<module>/<nền-tảng>/run_*/` hoặc `retest_*/` |
 
 > User đưa **cả hai** loại → chạy hai nhánh riêng, xuất **hai file phân tích riêng**. Cộng số PASS của manual vào automation là sai: hai bên đo hai phạm vi khác nhau, con số gộp không có ý nghĩa.
 
@@ -71,7 +71,7 @@ Hai nguồn report khác nhau về bản chất; chọn nhầm nhánh là phân 
 
 | Input | Cách lấy |
 |---|---|
-| **Report manual** | User cung cấp path, HOẶC glob `docs/executions/<module>/run_*/execution_report.md` và `docs/executions/<module>/retest_*/retest_report.md` |
+| **Report manual** | User cung cấp path, HOẶC glob `docs/executions/<module>/<nền-tảng>/run_*/execution_report.md` và `docs/executions/<module>/<nền-tảng>/retest_*/retest_report.md` (và `docs/executions/<module>/run_*/` của lần chạy cũ chưa có tầng nền tảng). **Không** gộp lần chạy của hai nền tảng vào một chuỗi trend — TC ID khác nhau, so sánh vô nghĩa |
 | **Nguồn TC gốc** (khuyến nghị) | `docs/testcases/<module>/` — cần khi phải phân biệt "bug ứng dụng" với "TC viết sai" |
 | **Các lần chạy trước cùng module** | Tự glob — có ≥ 2 run thì làm luôn phần trend, không cần hỏi |
 
@@ -114,7 +114,7 @@ Nguồn TC đã đổi giữa 2 lần chạy → nêu rõ, **không** so số th
 
 **Bước 5: Báo Cáo**
 
-Xuất `docs/executions/<module>/analysis_<timestamp>.md`:
+Xuất `docs/executions/<module>/<nền-tảng>/analysis_<timestamp>.md`:
 
 ```markdown
 # Phân Tích Kết Quả Manual — <Module>
@@ -173,7 +173,7 @@ Xuất `docs/executions/<module>/analysis_<timestamp>.md`:
 | Nhánh | File |
 |---|---|
 | AUTOMATION | `test_report_analysis.md` — tổng quan · phân loại failure · pattern · trend · thứ tự xử lý |
-| MANUAL | `docs/executions/<module>/analysis_<timestamp>.md` — theo template trên |
+| MANUAL | `docs/executions/<module>/<nền-tảng>/analysis_<timestamp>.md` — theo template trên |
 
 **Bước tiếp theo gợi ý cho user:**
 
