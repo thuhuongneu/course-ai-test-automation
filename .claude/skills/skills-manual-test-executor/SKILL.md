@@ -59,6 +59,8 @@ skills-rbt-manual-testing          skills-manual-test-executor          skills-b
 | Mức độ dùng chung của môi trường | ⭐ Bắt buộc | Dùng chung → bật auto-skip TC phá huỷ; môi trường riêng → có thể chạy đầy đủ |
 
 > Thiếu phạm vi chạy → agent **hỏi** thay vì mặc định chạy toàn bộ (bộ TC có thể tới hàng trăm TC).
+>
+> TC mang tag `@Deprecated` (chức năng đã gỡ) **bị loại khỏi phạm vi ngay lúc lọc** — không chạy, không tính vào tổng, **không** tính SKIPPED (SKIPPED là nợ kiểm thử, còn TC này không còn gì để kiểm). Header report ghi số TC Deprecated đã loại.
 
 ---
 
@@ -94,17 +96,33 @@ navigate → wait_for(page_load) → snapshot → interact → screenshot(on_fai
 
 Agent **tự động chuyển SKIPPED** và **KHÔNG thực thi** khi TC có bất kỳ dấu hiệu sau:
 
+> ⚠️ `Automation = No` **KHÔNG** phải dấu hiệu bỏ qua — cột đó chỉ nói TC không làm automation, còn chạy tay vẫn chạy bình thường. Chỉ tag `@PersonalOnly` mới đưa TC ra khỏi `/execute-test-cases`.
+
 | Dấu hiệu | Ví dụ |
 |---|---|
-| Tag `@ManualOnly` hoặc `Automatable = No` do rủi ro dữ liệu | TC_030 (Bulk Actions), TC_132 (xoá qua URL GET) |
+| Tag `@PersonalOnly` — QA tự chạy và tự theo dõi ngoài workflow (TC chạy quá lâu, cần thao tác tay đặc biệt…) | TC_026 (chờ 65 phút) |
 | Steps chứa thao tác xoá hàng loạt | `Mass Delete`, `Select All`, chọn nhiều bản ghi rồi xoá |
 | Steps gọi trực tiếp URL phá huỷ | `/admin/clients/delete/{id}` trên thanh địa chỉ |
 | Steps tải lên tệp thực thi | `.exe`, `.sh`, `.bat` |
-| Steps sinh dữ liệu cực lớn | chuỗi 255+ ký tự, import hàng trăm dòng |
+| Steps sinh **khối lượng** dữ liệu lớn | import hàng trăm dòng, tạo hàng loạt bản ghi bằng vòng lặp |
+
+> ⚠️ Nhập **một chuỗi dài vào một field** (VD 256 ký tự vào ô max 255) **KHÔNG** phải dấu hiệu nguy hiểm — đó là TC giá trị biên (BVA `max+1`), chỉ tạo tối đa một bản ghi và được dọn như mọi dữ liệu khác. Bỏ qua nó là rụng cả lớp kiểm tra biên mà không ai biết.
 
 Ghi vào report: `⏭️ SKIPPED — thao tác phá huỷ trên môi trường dùng chung, cần chạy tay có giám sát`.
 
 > Môi trường **test riêng** → tester khai báo lúc bắt đầu, agent tắt quy tắc này và ghi rõ trong header report.
+
+---
+
+## TC đặc biệt — cách chạy và chấm
+
+| Loại TC | Cách chạy | Cách chấm |
+|---|---|---|
+| **Độ hạt GỘP — Bảng biến thể** (Kiểu A, mã `a`, `b`, `c`…) | Chạy **từng biến thể**, cùng chuỗi steps, đổi giá trị theo bảng | PASS khi **mọi** biến thể PASS. Biến thể lệch → TC `FAIL`, cột `Bước fail` ghi `<số bước> · biến thể <mã>`, chi tiết FAIL ghi mã đầy đủ `<TC ID>-<mã>` (VD `CRM_LOGIN_TC_012-c`) ở dòng `Bước fail`. Heading `### FAIL #n — <TC ID> · <kịch bản>` giữ **TC ID trần** — `scripts/execution-viewer` nối chi tiết FAIL với bảng kết quả theo TC ID. Nhiều biến thể fail → liệt kê đủ trong dòng `Bước fail` |
+| **Độ hạt GỘP — Bảng kiểm** (Kiểu B, mục `1`, `2`, `3`…) | Đối chiếu từng mục trên cùng màn hình | PASS khi mọi mục đạt. Mục lệch → ghi số mục + REQ của mục đó |
+| **`@TechCheck`** — có dòng `🔧 Ghi chú kỹ thuật (cần DevTools):` | Chấm phần TC chính như bình thường. Phần 🔧: agent kiểm **nếu làm được** bằng công cụ đang có (`browser_evaluate`, `browser_network_requests`, xem cookie) | Phần chính quyết định PASS/FAIL. Phần 🔧 kiểm được mà lệch → `FAIL`. Không kiểm được → vẫn chấm theo phần chính, cột Ghi chú ghi `🔧 chưa kiểm — <lý do>`. 🔒 Ghi **hình thái**, không chép giá trị cookie/token thật vào report |
+| **`@NeedsVerify`** — Expected ghi `⚠️ chưa có evidence` | Chạy bình thường, **ghi lại nguyên văn** điều quan sát được ở chỗ chưa có evidence | Khớp Expected → `PASS`, ghi chú *"đã xác nhận trên UI — đề nghị gỡ `@NeedsVerify`"*. Lệch → `FAIL` kèm ghi chú *"Expected chưa có evidence — đối chiếu lại TC trước khi báo bug"*; mục Đề xuất trỏ `/review-testcases`, **không** trỏ thẳng `/create-bug-report` |
+| **Mục checklist** (nguồn `checklist_*.md`) | Mỗi mục `#` là một đơn vị chạy — thao tác theo cột `Hạng mục kiểm tra`, đối chiếu cột `Kết quả kỳ vọng` | Cột `TC ID` của report ghi `#<số mục>`, kèm `TC ID liên quan` nếu có. **Không** tick vào file checklist — kết quả nằm trong execution report; bảng ký nhận của checklist do người chịu trách nhiệm tự điền |
 
 ---
 
@@ -180,13 +198,13 @@ File: `docs/executions/<module>/<nền-tảng>/<run_id>/execution_report.md`
 |---|---|
 | Run ID | run_1785700456 |
 | Nền tảng | `web` — một lần chạy thuộc đúng một nền tảng, quyết định thư mục `docs/executions/<module>/<nền-tảng>/` |
-| Nguồn TC | docs/testcases/customers/parts/part_01_danh_sach.md |
-| Phạm vi | 36 TC (toàn bộ Part 1) |
+| Nguồn TC | docs/testcases/customers/web/parts/part_01_web_danh_sach.md |
+| Phạm vi | 36 TC (toàn bộ Part 1) · loại 2 TC `@Deprecated` |
 | Môi trường | `<URL môi trường test>` — `<Staging/UAT/Production>` |
 | Build / Version | (nếu có) |
 | Tài khoản | `<tài khoản test>` (`<role>`) |
 | Người thực hiện | <tên tester> (agent hỗ trợ) |
-| Bắt đầu → Kết thúc | 2026-08-02 09:15 → 10:40 (85 phút) |
+| Bắt đầu → Kết thúc | 02-08-2026 09:15 → 10:40 (85 phút) |
 | Môi trường dùng chung? | Có — auto-skip TC phá huỷ đang BẬT |
 
 ## 1. Tổng kết
@@ -206,7 +224,7 @@ File: `docs/executions/<module>/<nền-tảng>/<run_id>/execution_report.md`
 | TC ID | Test Scenario | Kết quả | Bước fail | Ghi chú |
 |---|---|---|---|---|
 | CRM_CUST_TC_001 | Bảng hiển thị đủ 9 cột | ✅ PASS | — | — |
-| CRM_CUST_TC_011 | Search chuỗi SQL injection | ❌ FAIL | 4 | Xem chi tiết #1 |
+| CRM_CUST_TC_011 | Search chuỗi SQL injection | ❌ FAIL | 4 · biến thể `b` | Xem chi tiết #1 |
 | CRM_CUST_TC_030 | Modal Bulk Actions | ⏭️ SKIPPED | — | Thao tác phá huỷ, môi trường dùng chung |
 
 ## 3. Chi tiết TC FAIL
@@ -217,9 +235,10 @@ File: `docs/executions/<module>/<nền-tảng>/<run_id>/execution_report.md`
 |---|---|
 | REQ ID | REQ-CUST-04 |
 | Priority | High |
-| Bước fail | Bước 4 |
-| **Expected** | Request trả HTTP 200; bảng hiển thị 0 kết quả |
-| **Actual** | Request trả HTTP 500; trang hiện thông báo lỗi cơ sở dữ liệu |
+| Bước fail | Bước 4 · biến thể `b` (`' OR 1=1--`) — biến thể `a`, `c` PASS |
+| **Expected** | Bảng hiển thị trạng thái "không có kết quả", trang không báo lỗi |
+| **Actual** | Trang hiện thông báo lỗi cơ sở dữ liệu, bảng không hiển thị |
+| 🔧 Ghi chú kỹ thuật | Tab Network: request tìm kiếm trả mã `500` |
 | Evidence | ![](evidence/CRM_CUST_TC_011_step4_error500.png) |
 | Tái hiện được? | Có — thử lại 2 lần đều lỗi |
 
@@ -256,4 +275,8 @@ File: `docs/executions/<module>/<nền-tảng>/<run_id>/execution_report.md`
 - ❌ Chụp screenshot mọi bước của mọi TC → report nặng, khó đọc
 - ❌ Dồn ghi kết quả tới cuối buổi thay vì ghi ngay sau mỗi TC
 - ❌ Báo cáo pass rate mà tính cả SKIPPED vào mẫu số (làm đẹp số liệu sai lệch)
+- ❌ Chạy TC `@Deprecated`, hoặc đếm nó vào SKIPPED
+- ❌ Tự bỏ qua TC giá trị biên vì "chuỗi dài" — chuỗi dài vào một field không phải thao tác phá huỷ
+- ❌ TC gộp FAIL mà không ghi **mã biến thể** — người sửa không biết case nào hỏng
+- ❌ TC `@NeedsVerify` lệch Expected rồi đề xuất báo bug ngay — Expected chưa có evidence, phải đối chiếu lại TC trước
 - ❌ Bỏ qua mục "Dữ liệu đã tạo & dọn dẹp" trong report

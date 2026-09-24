@@ -153,7 +153,7 @@ Trước khi khám phá bất cứ thứ gì:
    - **Có** → đọc bảng danh mục: module nào đã có, **prefix nào đã bị chiếm**. Lần chạy này là **bổ sung**, không phải khởi tạo lại
    - **Chưa** → sẽ tạo mới ở Bước 6 (skill mục 5.7.1)
 2. `docs/requirements/_discovery/system_map.md` — đã khám phá lần nào chưa? Có thì đọc để **cập nhật delta**, không viết đè
-3. Glob `docs/requirements/*/requirements_*.md` — đối chiếu chéo với danh mục theo bảng dưới. Đây là **thư mục thật vs danh mục khai báo**; lệch ở đây là dấu hiệu một phiên trước đã quên cập nhật
+3. Glob `docs/requirements/*/REQUIREMENTS_*_SUMMARY.md` — đối chiếu chéo với danh mục theo bảng dưới. Đây là **thư mục thật vs danh mục khai báo**; lệch ở đây là dấu hiệu một phiên trước đã quên cập nhật
 
 | Điểm lệch | Xử lý ngay ở Bước 1 |
 |---|---|
@@ -401,8 +401,8 @@ Tách ngay kể cả khi ≤ 8 module, nếu gặp **bất kỳ** dấu hiệu:
 
 | Module | Prefix | Nền tảng | Trạng thái recon | Mức phủ tài liệu | Tài liệu | REQ đã dùng | Mã kế tiếp | AMB treo | Cập nhật |
 |---|---|---|---|---|---|---|---|---|---|
-| Khách hàng | `CUST` | Web ⬜ · Android ⬜ · API ⬜ | ⬜ Chưa khảo sát | 🟨 Một phần | — | — | `REQ-CUST-01` | — | 2026-08-10 |
-| Đăng nhập | `LOGIN` | Web ✅ · Android ⬜ | 🟨 Đang khảo sát | 🟩 Đầy đủ | [requirements_login.md](login/requirements_login.md) | 01 → 14 | `REQ-LOGIN-15` | AMB-02 | 2026-08-11 |
+| Khách hàng | `CUST` | Web ⬜ · Android ⬜ · API ⬜ | ⬜ Chưa khảo sát | 🟨 Một phần | — | — | `REQ-CUST-01` | — | 10-08-2026 |
+| Đăng nhập | `LOGIN` | Web ✅ · Android ⬜ | 🟨 Đang khảo sát | 🟩 Đầy đủ | `login/REQUIREMENTS_LOGIN_SUMMARY.md` | 01 → 14 | `REQ-LOGIN-15` | AMB-LOGIN-02 | 11-08-2026 |
 
 Cột `Nền tảng` mang dấu trạng thái **riêng từng mặt** — `Trạng thái recon` tổng chỉ ✅ khi **mọi** mặt đã ✅ (hoặc ⏸️ hoãn có lý do). Hệ thống chỉ một mặt → có thể bỏ cột (skill 5.7.2).
 
@@ -412,7 +412,7 @@ Cột `Nền tảng` mang dấu trạng thái **riêng từng mặt** — `Trạ
 |---|---|---|
 | ⬜ | **Chưa khảo sát** — mới chỉ phát hiện tên | Chạy `/generate-requirements-from-website` |
 | 🟨 | **Đang khảo sát** — recon dở dang | Tiếp tục, nêu rõ đang dở ở đâu |
-| ✅ | **Đã có tài liệu** — `requirements_<module>.md` đã phát hành | Sẵn sàng sinh test case |
+| ✅ | **Đã có tài liệu** — `REQUIREMENTS_<TÊN_MODULE>_SUMMARY.md` đã phát hành | Sẵn sàng sinh test case |
 | ⏸️ | **Hoãn** — user chốt ngoài phạm vi đợt này | Ghi lý do, giữ prefix |
 | ⚪ | **Chưa implement** — phát hiện qua tài liệu/API, UI chưa có | Không recon được; viết TC trước, đánh `skip` |
 
@@ -440,7 +440,7 @@ Nguyên tắc: **cái gì cắt ngang nhiều module thì ở index, cái gì th
 
 **6.4 — Hợp đồng đọc: index bất biến + Bản đồ tài liệu**
 
-Giống nguyên tắc `requirements_<module>.md` ở skill mục 5.5 — workflow phía sau chỉ cần biết **một** đường dẫn:
+Giống nguyên tắc `REQUIREMENTS_<TÊN_MODULE>_SUMMARY.md` ở skill mục 5.5 — workflow phía sau chỉ cần biết **một** đường dẫn:
 
 ```
 docs/requirements/_discovery/system_map.md
@@ -488,7 +488,7 @@ Không có mục này → workflow sau hiểu là bản đồ 1 file và **sẽ 
 
 **Bất biến khi tách/gộp — kiểm trước khi bàn giao:**
 
-- [ ] **Prefix giữ nguyên tuyệt đối** — gộp file **KHÔNG** gộp prefix. 3 module chung một file vẫn là 3 prefix `LOGIN` · `USER` · `ROLE`, và về sau vẫn sinh ra 3 file `requirements_<module>.md` riêng
+- [ ] **Prefix giữ nguyên tuyệt đối** — gộp file **KHÔNG** gộp prefix. 3 module chung một file vẫn là 3 prefix `LOGIN` · `USER` · `ROLE`, và về sau vẫn sinh ra 3 file `REQUIREMENTS_<TÊN_MODULE>_SUMMARY.md` riêng
 - [ ] **Mỗi module thuộc đúng 1 file** — không mồ côi, không nằm ở 2 file
 - [ ] **Tổng module trong các file = tổng module ở bảng index** — ghi rõ con số ở index để tự kiểm chứng
 - [ ] **Cột `Trạng thái recon` chỉ có ở một nơi** — file `README.md` danh mục. File module ở `_discovery/` **tham chiếu**, không nhân bản (nhân bản là chắc chắn lệch nhau sau vài lần cập nhật)

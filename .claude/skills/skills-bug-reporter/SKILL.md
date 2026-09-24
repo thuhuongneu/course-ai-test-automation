@@ -43,10 +43,10 @@ Sử dụng skill này khi:
 - **Nền tảng:** `web` / `mobile` / `api` — quyết định thư mục `docs/bugs/<module>/<nền-tảng>/`. Bug của rule ở server tái hiện được trên nhiều nền tảng → vẫn **một** bug, đặt ở nền tảng phát hiện đầu tiên, ghi thêm *"Cũng tái hiện trên: …"*
 - **Môi trường:** <env> | <browser + version — hoặc thiết bị + OS + app version (mobile) — hoặc base URL môi trường (api)> | <OS> | <resolution>
 - **Build / Version:** <build đang test khi phát hiện lỗi — BẮT BUỘC, thiếu thì không retest được>
-- **Test case liên quan:** <TC ID hoặc test file path>
+- **Test case liên quan:** <TC ID hoặc test file path> — TC gộp thì ghi kèm **mã biến thể** fail (`CRM_LOGIN_TC_012-c`). TC ID phải đang có hiệu lực (không `@Deprecated`)
 - **REQ ID liên quan:** <mã REQ — dùng để chọn phạm vi regression khi retest>
 - **Test data đã dùng:** <email/username/id — traceable>
-- **Ngày phát hiện:** <YYYY-MM-DD>
+- **Ngày phát hiện:** <DD-MM-YYYY>
 
 ## Steps to Reproduce
 1. ...
@@ -60,7 +60,7 @@ Sử dụng skill này khi:
 <Hành vi thực tế quan sát được>
 
 ## Evidence
-- Screenshot: [<tên file>.png](<path/link>) — BẮT BUỘC viết đúng cú pháp link Markdown `[]()` nếu ảnh còn xem được; `bugs-viewer` chỉ nhận diện ảnh viết theo cú pháp này làm evidence bấm-xem-được. Ảnh cũ đã mất (không còn truy cập) thì ghi tên file bằng code span `` `tên_file.png` `` (KHÔNG bọc trong `[]()`) để không hiện nhầm thành ảnh "chưa nạp, kéo vào là được"
+- Screenshot: [<tên file>.png](<path/link>) — **link tới ảnh gốc** trong `docs/executions/<module>/<nền-tảng>/run_*/evidence/` (đường dẫn tương đối từ file bug: `../../../executions/<module>/<nền-tảng>/run_<timestamp>/evidence/<tên>.png`), **KHÔNG** chép ảnh sang `docs/bugs/` — một nguồn sự thật. Ảnh chụp thêm lúc tái hiện thì lưu vào `evidence/` của lần chạy tương ứng rồi link. BẮT BUỘC viết đúng cú pháp link Markdown `[]()` nếu ảnh còn xem được; `bugs-viewer` chỉ nhận diện ảnh viết theo cú pháp này làm evidence bấm-xem-được. Ảnh cũ đã mất (không còn truy cập) thì ghi tên file bằng code span `` `tên_file.png` `` (KHÔNG bọc trong `[]()`) để không hiện nhầm thành ảnh "chưa nạp, kéo vào là được"
 - Error log / Stack trace: (code block)
 - Console / Network log: (nếu liên quan)
 
@@ -133,18 +133,20 @@ Danh mục là **điểm vào tầng bug** và cũng là file `scripts/bugs-view
 | Hệ thống | <tên + URL> |
 | Quy ước mã bug | `BUG_<module>_<timestamp>_<TC_ID>` |
 | Đường dẫn file | `docs/bugs/<module>/<nền-tảng>/BUG_<module>_<timestamp>_<TC_ID>.md` |
-| Ngày cập nhật | <YYYY-MM-DD> |
+| Ngày cập nhật | <DD-MM-YYYY> |
 
 ## 1. Danh mục bug
 
 | Mã bug | Module | Nền tảng | Tiêu đề ngắn | Severity | Priority | Trạng thái | TC liên quan | Ngày phát hiện |
 |---|---|---|---|---|---|---|---|---|
-| [BUG_login_1787226514_TC016](login/BUG_login_1787226514_TC016.md) | `LOGIN` | Ô Email không giữ giá trị sau khi đăng nhập thất bại | 🟡 Minor | P2 | 🔴 **Đang mở** | `CRM_LOGIN_TC_016` | 2026-08-20 |
+| [BUG_login_1787226514_TC016](login/web/BUG_login_1787226514_TC016.md) | `LOGIN` | `web` | Ô Email không giữ giá trị sau khi đăng nhập thất bại | 🟡 Minor | P2 | 🔴 **Đang mở** | `CRM_LOGIN_TC_016` | 20-08-2026 |
 ```
 
 > ⚠️ **Tên cột là hợp đồng đọc, không phải nhãn trình bày.** `scripts/bugs-viewer` chỉ nhận bảng danh mục khi có **đồng thời** cột `Mã bug` **và** cột `Trạng thái` — thiếu một trong hai (hoặc dịch sang `Bug ID` / `Status`) thì viewer **bỏ toàn bộ bảng**, không báo lỗi gì. Các cột còn lại khớp theo chuỗi con (`Module`, `Tiêu đề`, `Severity`, `Priority`, `TC liên quan`, `Ngày phát hiện`) — thiếu thì chỉ mất cột đó.
 >
 > **Giá trị cột `Trạng thái`** phải chứa một trong các từ khoá viewer nhận: `Đang mở` · `Đã fix` / `Chờ retest` · `rà lại` · `đóng`. Viết kiểu khác thì bug bị xếp mặc định là *Đang mở*.
+>
+> **Ai cập nhật cột này:** `/create-bug-report` ghi `🔴 **Đang mở**` · dev báo đã fix → `🟡 Chờ retest` · `/retest-fixed-bugs` ghi theo kết quả retest (bảng ánh xạ ở Bước 5 của workflow đó). Cột này phải khớp dòng mới nhất của **Lịch sử retest** trong file bug — viewer tính trạng thái file chi tiết từ Lịch sử retest, còn bug chỉ có trong danh mục thì đọc cột này, lệch nhau là hai nơi báo hai trạng thái.
 >
 > **Cột `Mã bug` nên bọc link Markdown** trỏ tới file bug tương ứng — viewer lấy mã từ trong `[...]`, và người đọc bấm được sang chi tiết.
 

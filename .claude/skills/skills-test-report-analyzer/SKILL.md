@@ -94,11 +94,13 @@ Phân loại dựa trên **Expected vs Actual**, vì không có stack trace:
 | Category | Dấu hiệu trong report | Hành động |
 |---|---|---|
 | 🐛 **Bug ứng dụng** | Actual lệch Expected, Expected có căn cứ REQ, tái hiện được | `/create-bug-report` |
-| 📝 **TC viết sai / mơ hồ** | Expected không đo được, TC không nói rõ pre-condition, 2 TC cùng ID | `/review-testcases` — **KHÔNG** báo bug |
+| 📝 **TC viết sai / mơ hồ** | Expected không đo được, TC không nói rõ pre-condition, 2 TC cùng ID, **TC `@NeedsVerify` lệch Expected** (report ghi *"Expected chưa có evidence"* — Expected chưa từng được kiểm chứng, xét nhóm này **trước** khi kết luận bug) | `/review-testcases` — **KHÔNG** báo bug |
 | 📄 **Requirement đã lệch** | App chạy đúng logic mới, TC dựa trên requirement cũ | `/update-requirements-from-ticket` → `/update-testcases-from-impact` (**KHÔNG** dùng `/review-testcases` — rubric không bắt được TC stale) |
 | 🌐 **Môi trường / pre-condition** | Phần lớn BLOCKED, cùng lý do "không dựng được pre-condition", "không đăng nhập được" | Sửa môi trường trước, **KHÔNG** kết luận gì về chất lượng app |
 | 📊 **Test data** | "không tìm thấy bản ghi", data bị người khác sửa (môi trường dùng chung) | Sinh lại data, cân nhắc `/generate-test-data` |
 | 🔁 **Regression sau fix** | Xuất hiện trong `retest_report.md` mục "Regression phát sinh do fix" | Bug mới, priority cao — fix đã gây hỏng chỗ khác |
+
+> TC gộp FAIL ở **một vài biến thể** (`<TC ID>-<mã>` trong dòng `Bước fail`) → phân loại **theo từng biến thể**, không theo cả TC: biến thể `b` có thể là bug ứng dụng trong khi biến thể `d` là TC viết sai.
 
 ### Ba tín hiệu riêng của manual — bắt buộc kiểm
 

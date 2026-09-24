@@ -31,7 +31,7 @@ Chạy bộ manual test cases trực tiếp trên browser thật, đối chiếu
 ## Các bước thực hiện
 
 ### Bước 1: Xác nhận phạm vi
-1. Đọc file TC, lọc theo phạm vi user chọn
+1. Đọc file TC, lọc theo phạm vi user chọn — **loại luôn TC `@Deprecated`** (không chạy, không tính tổng, không tính SKIPPED; ghi số đã loại ở header report)
 2. Đếm số TC sẽ chạy, ước tính thời gian
 3. Công bố kế hoạch trước khi bắt đầu:
    ```
@@ -54,10 +54,10 @@ Chạy bộ manual test cases trực tiếp trên browser thật, đối chiếu
 
 ### Bước 4: Chạy từng TC
 Với mỗi TC theo thứ tự:
-1. **Kiểm tra Auto-Skip** — TC có tag `@ManualOnly`/`Automatable = No` do rủi ro, hoặc steps chứa Mass Delete / Select All / xoá qua URL GET / upload `.exe` → `⏭️ SKIPPED` + ghi lý do, sang TC tiếp
+1. **Kiểm tra Auto-Skip** — TC có tag `@PersonalOnly` (`Automation = No` **không** phải lý do bỏ qua — vẫn chạy bình thường), hoặc steps chứa Mass Delete / Select All / xoá qua URL GET / upload `.exe` / import hàng loạt → `⏭️ SKIPPED` + ghi lý do, sang TC tiếp. **Nhập chuỗi dài vào một field** (TC biên `max+1`) **không** phải lý do skip
 2. **Dựng Pre-Condition** — không dựng được → `⚠️ BLOCKED` + ghi nguyên nhân
 3. **Thực hiện đúng từng bước** trong Test Steps — không tự thêm/bớt bước
-4. **Verify từng Expected** bằng `snapshot` sau mỗi bước có kết quả quan sát được
+4. **Verify từng Expected** bằng `snapshot` sau mỗi bước có kết quả quan sát được. TC đặc biệt chạy theo bảng **TC đặc biệt** của skill: TC gộp chạy **từng biến thể** (FAIL ghi mã `<TC ID>-<mã>`) · `@TechCheck` chấm phần chính, phần `🔧` kiểm nếu làm được · `@NeedsVerify` lệch thì ghi chú đối chiếu lại TC · mục checklist ghi `#<số mục>`
 5. **Chấm trạng thái:**
    - Mọi Expected khớp → `✅ PASS`
    - Có Expected không khớp → `❌ FAIL` + **screenshot ngay tại bước fail** + ghi Actual vs Expected
@@ -103,4 +103,4 @@ Agent chạy tiếp qua TC fail (fail-forward), **chỉ dừng** khi:
 | Có TC FAIL | `/create-bug-report` — sinh bug report chuẩn từ evidence đã thu |
 | Nhiều TC FAIL cần gom nhóm root cause | `/analyze-test-report` |
 | Cần đẩy kết quả lên Xray | `/import-test-results-xray` |
-| TC FAIL do TC viết sai (không phải lỗi hệ thống) | `/review-testcases` mode FIX — **không sửa TC trong lúc chạy** |
+| TC FAIL do TC viết sai (không phải lỗi hệ thống), kể cả TC `@NeedsVerify` lệch Expected | `/review-testcases` mode FIX — **không sửa TC trong lúc chạy** |

@@ -22,7 +22,7 @@ description: Cửa vào chung để sinh automation từ test cases — tự nh�
 |---|---|---|
 | 1 | User nêu mode `WEB` / `MOBILE` / `API` | Theo user |
 | 2 | Đường dẫn file TC có tầng nền tảng: `docs/testcases/<module>/web/…` · `mobile/…` · `api/…` (hoặc hậu tố tên file `_web` · `_mobile` · `_api`) | Theo tầng |
-| 3 | Đưa file **index** `test_cases_<module>.md` → đọc `## Bản đồ tài liệu` | Một nền tảng → theo đó · **Nhiều nền tảng** → hỏi user chạy nền tảng nào; chọn "tất cả" thì chạy **lần lượt từng nền tảng**, mỗi nền tảng một lượt command đích |
+| 3 | Đưa file **index** `TEST_CASES_<TÊN_MODULE>_SUMMARY.md` → đọc `## Bản đồ tài liệu` | Một nền tảng → theo đó · **Nhiều nền tảng** → hỏi user chạy nền tảng nào; chọn "tất cả" thì chạy **lần lượt từng nền tảng**, mỗi nền tảng một lượt command đích |
 | 4 | Tag / cột trong TC: `@Android` · `@iOS` → MOBILE · `@API` hoặc `Auto Type` = `API` → API · `@Web` → WEB | Theo tag |
 | 5 | Không xác định được (bộ TC cũ chưa có tầng nền tảng, file ngoài repo) | **WEB** — công bố rõ là đang dùng mặc định |
 

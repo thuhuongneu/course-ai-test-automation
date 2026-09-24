@@ -15,7 +15,7 @@ Command này phân tích đặc tả API, xác định endpoint, và sinh **API 
 
 ```
 /discover-system (nhánh API) → /generate-requirements-from-api → /generate-testcases-api → /generate-automation-api
-        api_map.md                  requirements_<module>.md       test_cases_<module>_api.md    code + reports/
+        api_map.md                  REQUIREMENTS_<TÊN_MODULE>_SUMMARY.md       test_cases_<module>_api.md    code + reports/
 ```
 
 Chạy thẳng command này khi chưa có hai tầng trước vẫn được — Bước 1 tự làm tầng khám phá — nhưng TC sẽ **không có REQ** để neo (xem Bước 2).
@@ -27,7 +27,7 @@ Chạy thẳng command này khi chưa có hai tầng trước vẫn được —
 - **Tất cả output bằng Tiếng Việt**
 - **KHÔNG đoán** schema/endpoint — phải đọc spec thực tế (JSON/YAML)
 - **KHÔNG tin spec suông** — spec là *lời khai*, không phải *hành vi*. Phải gọi thật để kiểm chứng (Bước 1b)
-- **Đọc trước khi làm lại:** đã có `api_map.md` và `requirements_<module>.md` thì dùng, không khám phá lại, không tự đặt prefix
+- **Đọc trước khi làm lại:** đã có `api_map.md` và `REQUIREMENTS_<TÊN_MODULE>_SUMMARY.md` thì dùng, không khám phá lại, không tự đặt prefix
 - **Phải chờ user xác nhận** scope tại Bước 2 trước khi sinh chi tiết
 - Nếu user chưa cung cấp nguồn spec → hỏi trước khi bắt đầu
 
@@ -175,7 +175,7 @@ Cập nhật `README.md` danh mục hệ thống (tạo mới nếu chưa có): 
 1. **Ghi file đúng chỗ — KHÔNG để lạc ra root:**
 
    ```
-   docs/testcases/[_<hệ-thống>/]<module>/test_cases_<module>.md               ← INDEX, TÊN FILE BẤT BIẾN — tổng hợp + Bản đồ tài liệu
+   docs/testcases/[_<hệ-thống>/]<module>/TEST_CASES_<TÊN_MODULE>_SUMMARY.md               ← INDEX, TÊN FILE BẤT BIẾN — tổng hợp + Bản đồ tài liệu
    docs/testcases/[_<hệ-thống>/]<module>/api/test_cases_<module>_api.md       ← TC API của module
    docs/testcases/[_<hệ-thống>/]<module>/api/parts/part_NN_api_<slug>.md      ← khi file API > 40 TC
    ```
@@ -185,12 +185,14 @@ Cập nhật `README.md` danh mục hệ thống (tạo mới nếu chưa có): 
    **Module đã có TC của web/mobile** (chung prefix — skill 2.2) → TC API ghi vào `api/test_cases_<module>_api.md` **cùng thư mục module**, TC ID **nối tiếp** dải chung đã dùng (đọc `docs/testcases/README.md`), gắn tag `@API`, và thêm dòng API vào `## Bản đồ tài liệu` của index. ❌ Không mở dải TC ID riêng cho API.
 
 2. Cấu trúc mỗi file:
-   - **Tổng quan** — Base URL, Version, Auth method, số endpoint của module, link ngược về `_discovery/api_map.md` và `requirements_<module>.md`
+   - **Tổng quan** — Base URL, Version, Auth method, số endpoint của module, link ngược về `_discovery/api_map.md` và `REQUIREMENTS_<TÊN_MODULE>_SUMMARY.md`
    - **Endpoint Catalog** — Bảng: `| # | Method | Path | Auth | Mô tả | Số Test Cases |`
-   - **Test Cases chi tiết** — theo từng endpoint, bảng TC dùng **đúng tên cột** của skill `skills-rbt-manual-testing` mục *Bảng Output Standard* (`TC ID · REQ ID · Module · Risk Level · Test Scenario · Pre-Condition · Test Steps · Test Data · Expected Result · Priority · Automatable · Auto Type · Tags`) — `scripts/testcases-viewer` và `/generate-automation-api` đọc theo tên cột. `Auto Type` = `API`, `Tags` có `@API`. Mỗi TC có **TC ID** `<HỆ_THỐNG>_<MODULE>_TC_<nnn>` và **REQ ID** trỏ vào REQ API (hoặc `⚠️ Chưa có REQ` — Bước 2)
+   - **Test Cases chi tiết** — theo từng endpoint, bảng TC dùng **đúng tên cột** của skill `skills-rbt-manual-testing` mục *Bảng Output Standard* (`TC ID · REQ ID · Module · Risk Level · Test Scenario · Pre-Condition · Test Steps · Test Data · Expected Result · Priority · Automation · Auto Type · Tags`) — `scripts/testcases-viewer` và `/generate-automation-api` đọc theo tên cột. `Auto Type` = `API`, `Tags` có `@API`. Mỗi TC có **TC ID** `<HỆ_THỐNG>_<MODULE>_TC_<nnn>` và **REQ ID** trỏ vào REQ API (hoặc `⚠️ Chưa có REQ` — Bước 2)
    - **Test Data Matrix** — data valid/invalid/boundary cho mỗi model
    - **Dependencies & Execution Order** — thứ tự chạy test
    - **TC treo** — TC chưa viết được, kèm mã AMB đang chặn
+
+   > 🚨 **Một request chứng minh được nhiều REQ vẫn phải tách TC.** VD `POST /api/login` không gửi token → `200` vừa là *"đăng nhập thành công"* vừa là *"đăng nhập không cần token"* — nếu hai REQ đó **không** có TC nào khác thì phải là **hai TC**, mỗi TC một Expected cốt lõi. Gộp lại thì khi FAIL không biết REQ nào hỏng, và RTM báo cả hai "đã phủ" dù không TC nào **chỉ** kiểm riêng từng cái. Chạy phép thử **6b** của skill `skills-rbt-manual-testing` (có mẫu script) trước khi ghi file. **Số TC ít hơn số REQ không phải lỗi**, nhưng là tín hiệu bắt buộc chạy phép thử này.
 
 3. **Cập nhật `README.md` danh mục**: dải TC ID đã dùng · mã kế tiếp · cột `Nền tảng` (số TC API) · ngày cập nhật · dòng nhật ký.
 
@@ -213,7 +215,7 @@ Cập nhật `README.md` danh mục hệ thống (tạo mới nếu chưa có): 
 
 ### Test cases
 
-- `docs/testcases/[_<hệ-thống>/]<module>/api/test_cases_<module>_api.md` + cập nhật index `test_cases_<module>.md` — mỗi module 1 file API (chung thư mục module và dải TC ID với TC web/mobile), đủ 12 Status Codes, 7 loại Test Scenarios, OWASP Security, Test Data Matrix, TC ID truy vết được.
+- `docs/testcases/[_<hệ-thống>/]<module>/api/test_cases_<module>_api.md` + cập nhật index `TEST_CASES_<TÊN_MODULE>_SUMMARY.md` — mỗi module 1 file API (chung thư mục module và dải TC ID với TC web/mobile), đủ 12 Status Codes, 7 loại Test Scenarios, OWASP Security, Test Data Matrix, TC ID truy vết được.
 
 ---
 
@@ -222,10 +224,11 @@ Cập nhật `README.md` danh mục hệ thống (tạo mới nếu chưa có): 
 - [ ] Spec lấy bằng tải thô (không `WebFetch`), đã snapshot xuống `_discovery/sources/`, số operation khớp trang tài liệu
 - [ ] Ma trận auth lập theo **từng operation**, đã soi endpoint công khai trả dữ liệu cá nhân
 - [ ] Đã gọi thật kiểm chứng, mỗi sai lệch có mã `F-nn` + bằng chứng nguyên văn
-- [ ] Ambiguity ghi thành `AMB-nn`, AMB 🔴 đã báo user ở checkpoint Bước 2
+- [ ] Ambiguity ghi thành `AMB-<MODULE>-nn`, AMB 🔴 đã báo user ở checkpoint Bước 2
 - [ ] File TC nằm đúng `docs/testcases/[_<hệ-thống>/]<module>/api/`, **không** lạc ra root; TC ID nối tiếp dải chung của module; index có dòng API trong `## Bản đồ tài liệu`
 - [ ] Bảng TC dùng đúng tên cột của Bảng Output Standard — viewer và `/generate-automation-api` đọc được
 - [ ] Mọi TC có `REQ ID` trỏ vào REQ có thật, hoặc ghi `⚠️ Chưa có REQ` và đã báo số TC chưa neo
+- [ ] **Phép thử 6b** đã chạy: không TC nào gánh ≥ 2 REQ mà các REQ đó không có TC khác chống lưng — vi phạm thì đã tách, TC mới cấp số **nối tiếp** dải
 - [ ] `README.md` danh mục đã cập nhật prefix · dải TC ID · nhật ký
 - [ ] Mọi bản ghi tạo khi kiểm chứng đã dọn; số tạo / số dọn ghi rõ trong báo cáo
 - [ ] **Không** bản ghi có sẵn nào của hệ thống bị sửa hoặc xoá

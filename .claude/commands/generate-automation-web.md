@@ -44,7 +44,7 @@ Workflow đọc test case web (hoặc mô tả flow), tự mở browser inspect 
 
 | Input | Mode | Cách lấy | Độ ưu tiên |
 |---|---|---|---|
-| **File test cases** (MD/Excel/JSON/URL) | TC | User cung cấp path hoặc URL. Đưa file **index** `test_cases_<module>.md` → theo `## Bản đồ tài liệu` chỉ lấy file `web/` | ⭐ Bắt buộc |
+| **File test cases** (MD/Excel/JSON/URL) | TC | User cung cấp path hoặc URL. Đưa file **index** `TEST_CASES_<TÊN_MODULE>_SUMMARY.md` → theo `## Bản đồ tài liệu` chỉ lấy file `web/` | ⭐ Bắt buộc |
 | **Mô tả flow** (lời · video · ảnh) | FLOW | User cung cấp. Chỉ có URL → agent tự khám phá flow chính | ⭐ Bắt buộc |
 | **URL ứng dụng** | Cả hai | User cung cấp hoặc trong TC | ⭐ Bắt buộc |
 | **Credentials** (nếu cần login) | Cả hai | User cung cấp hoặc dùng fixture sẵn | Tùy chọn |

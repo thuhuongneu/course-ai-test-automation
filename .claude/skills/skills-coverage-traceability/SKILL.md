@@ -34,8 +34,8 @@ Sử dụng skill này khi:
 
 | Nguồn | Đọc thế nào |
 |---|---|
-| Requirements | `docs/requirements/<module>/requirements_<module>.md` (REQ dùng chung) → theo `## Bản đồ tài liệu` đọc **mọi** file `<nền-tảng>/requirements_<module>_<nền-tảng>.md` và `stories/` |
-| Test cases | `docs/testcases/<module>/test_cases_<module>.md` → theo `## Bản đồ tài liệu` đọc **mọi** file `<nền-tảng>/test_cases_<module>_<nền-tảng>.md` và `parts/` |
+| Requirements | `docs/requirements/<module>/REQUIREMENTS_<TÊN_MODULE>_SUMMARY.md` (REQ dùng chung) → theo `## Bản đồ tài liệu` đọc **mọi** file `<nền-tảng>/requirements_<module>_<nền-tảng>.md` và `stories/` |
+| Test cases | `docs/testcases/<module>/TEST_CASES_<TÊN_MODULE>_SUMMARY.md` → theo `## Bản đồ tài liệu` đọc **mọi** file `<nền-tảng>/test_cases_<module>_<nền-tảng>.md` và `parts/` |
 
 ⚠️ Index test cases **không chứa dòng TC** — chỉ đọc index là báo độ phủ 0% sai. Tài liệu cũ chưa có tầng nền tảng (không có bản đồ) thì đọc như tài liệu một file.
 
@@ -55,6 +55,7 @@ Sử dụng skill này khi:
 2. **Map bằng nội dung khi thiếu ID** — so khớp mô tả TC với tên test method; kết quả đánh dấu ⚠️ cần người xác nhận
 3. **1 requirement có thể map nhiều TC** và ngược lại — RTM là quan hệ n-n
 4. **KHÔNG bịa mapping** — không chắc thì để trống và liệt kê vào mục "cần xác nhận"
+5. **TC mang tag `@Deprecated`** (chức năng đã gỡ — tiền tố `🗑️ Deprecated (…) —` ở `Test Scenario`) **không** được tính là đang phủ REQ và **không** vào mẫu số Automation Coverage. Liệt kê riêng: script automation còn trỏ vào TC `@Deprecated` là **script cần gỡ / skip**, không phải orphan
 
 ---
 

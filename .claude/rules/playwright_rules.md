@@ -8,7 +8,7 @@
 
   | Chế độ | Viewport | Ghi chú |
   |---|---|---|
-  | Headed (debug) | **`1600×750`** (theo `--viewport-size` lúc launch) | Cửa sổ không nở được sau khi launch |
+  | Headed (debug) | **`1600×770`** (theo `--viewport-size` lúc launch) | Cửa sổ không nở được sau khi launch |
   | Headless (CI) | `1920×1080` | Không vướng khung trình duyệt |
 
 - **Playwright MCP — KHÔNG resize vượt cửa sổ:** `browser_resize` chỉ đổi **viewport**, **không** đổi kích thước cửa sổ OS. Đặt viewport lớn hơn cửa sổ → trang bị **cắt** phần bên phải/dưới, tester không nhìn thấy dù ảnh chụp vẫn đủ.
@@ -20,7 +20,7 @@
   3. browser_snapshot() hoặc browser_take_screenshot() → bắt đầu inspect
   ```
 
-  Số đo thực tế (Windows 1920×1080, Google Chrome): viewport `1600×750` → cửa sổ `1614×885`. Khung chiếm **+135 dọc** (ổn định) và **+14…17 ngang** (dao động theo scrollbar của trang). Muốn cửa sổ vừa màn hình `W×H` → `--viewport-size=(W-17),(H-135)` — trừ 17 cho chắc.
+  Số đo thực tế (Windows 1920×1080, Google Chrome): viewport `1600×770` → cửa sổ `1614×905`. Khung chiếm **+135 dọc** (ổn định) và **+14…17 ngang** (dao động theo scrollbar của trang). Muốn cửa sổ vừa màn hình `W×H` → `--viewport-size=(W-17),(H-135)` — trừ 17 cho chắc.
 
   Đổi viewport headed: sửa `--viewport-size` của MCP server `playwright` trong **`.mcp.json` ở gốc project**, rồi **khởi động lại Claude Code**. File này đè cấu hình global ở `%APPDATA%\Claude\claude_desktop_config.json`, và cho server chạy với cwd = gốc project nên mọi output (snapshot, console log, screenshot) rơi đúng vào `.playwright-mcp/` của project. Không dùng đường dẫn tuyệt đối trong file để còn mang sang máy khác được.
 - **Headed mode:** Bắt buộc mở browser có hiển thị (headed) trong quá trình thiết lập và debug test.

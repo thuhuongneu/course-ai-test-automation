@@ -121,26 +121,26 @@ Evidence: `docs/executions/<module>/<nền-tảng>/retest_<timestamp>/evidence/`
 |---|---|
 | Retest ID | retest_1785700456 |
 | Mode | FULL (verify + regression) |
-| Bug retest | BUG_CUST_1785612000 |
+| Bug retest | BUG_customers_1785612000_TC011 |
 | Build lúc log bug → Build retest | v2.4.1 → v2.4.3 |
 | Môi trường | `<URL>` — Staging |
 | Tài khoản | `<tài khoản test>` (`<role>`) |
 | Người thực hiện | <tên tester> (agent hỗ trợ) |
-| Thời gian | 2026-08-12 14:10 → 14:55 (45 phút) |
+| Thời gian | 12-08-2026 14:10 → 14:55 (45 phút) |
 | Môi trường dùng chung? | Có — auto-skip TC phá huỷ đang BẬT |
 
 ## 1. Kết quả verify bug
 
 | | |
 |---|---|
-| Bug | BUG_CUST_1785612000 — Search chuỗi SQL injection trả HTTP 500 |
+| Bug | BUG_customers_1785612000_TC011 — Search chuỗi SQL injection làm trang báo lỗi cơ sở dữ liệu |
 | Severity gốc | 🔴 Critical |
 | TC / REQ liên quan | CRM_CUST_TC_011 · REQ-CUST-04 |
 | **Kết quả** | ✅ **FIXED** |
-| Expected (theo bug gốc) | Request trả HTTP 200; bảng hiển thị 0 kết quả |
-| Actual lần này | Request trả HTTP 200; bảng hiển thị "Không tìm thấy kết quả" |
+| Expected (theo bug gốc) | Bảng hiển thị trạng thái "không có kết quả", trang không báo lỗi |
+| Actual lần này | Bảng hiển thị "Không tìm thấy kết quả", không có thông báo lỗi |
 | Số lần lặp | 2/2 đều đúng |
-| Evidence | ![](evidence/BUG_CUST_1785612000_retest_fixed.png) |
+| Evidence | ![](evidence/BUG_customers_1785612000_TC011_retest_fixed.png) |
 
 ## 2. Regression quanh vùng fix
 
@@ -168,7 +168,7 @@ Evidence: `docs/executions/<module>/<nền-tảng>/retest_<timestamp>/evidence/`
 | Expected | Trả về danh sách khách hàng có tên chứa `%` |
 | Actual | Trả về 0 kết quả với mọi từ khoá chứa `%` |
 | Nghi ngờ nguyên nhân | Bộ lọc escape ký tự thêm khi fix SQL injection đã escape luôn wildcard hợp lệ |
-| Bug mới | BUG_CUST_1785700456 |
+| Bug mới | BUG_customers_1785700456_TC012 |
 | Evidence | ![](evidence/CRM_CUST_TC_012_regression.png) |
 
 ## 4. Dữ liệu đã tạo & dọn dẹp
@@ -180,8 +180,8 @@ Evidence: `docs/executions/<module>/<nền-tảng>/retest_<timestamp>/evidence/`
 
 | Bug | Trạng thái đề xuất | Lý do |
 |---|---|---|
-| BUG_CUST_1785612000 | ✅ **Đóng** | Đã fix, verify 2/2 lần |
-| BUG_CUST_1785700456 | 🆕 **Mở mới** | Regression do chính bản fix trên gây ra |
+| BUG_customers_1785612000_TC011 | ✅ **Đóng** | Đã fix, verify 2/2 lần |
+| BUG_customers_1785700456_TC012 | 🆕 **Mở mới** | Regression do chính bản fix trên gây ra |
 
 - Fix giải quyết đúng lỗi gốc nhưng làm hỏng search wildcard — **cần fix bổ sung trước khi release**
 - Đề nghị dev thu hẹp phạm vi escape, chỉ escape ký tự nguy hiểm thay vì escape toàn bộ
@@ -198,9 +198,22 @@ Thêm mục **Lịch sử retest** vào cuối file `docs/bugs/<module>/<nền-t
 
 | Ngày | Build | Kết quả | Retest report | Ghi chú |
 |---|---|---|---|---|
-| 2026-08-12 | v2.4.3 | ✅ FIXED | [retest_1785700456](../docs/executions/customers/retest_1785700456/retest_report.md) | Kèm 1 regression mới: BUG_CUST_1785700456 |
-| 2026-08-08 | v2.4.2 | ❌ NOT_FIXED | [retest_1785350000](…) | Lỗi vẫn tái hiện 2/2 lần |
+| 12-08-2026 | v2.4.3 | ✅ FIXED | [retest_1785700456](../../../executions/customers/web/retest_1785700456/retest_report.md) | Kèm 1 regression mới: BUG_customers_1785700456_TC012 |
+| 08-08-2026 | v2.4.2 | ❌ NOT_FIXED | [retest_1785350000](…) | Lỗi vẫn tái hiện 2/2 lần |
 ```
+
+> Link retest report tính **tương đối từ file bug** `docs/bugs/<module>/<nền-tảng>/` → lùi 3 cấp về `docs/`: `../../../executions/<module>/<nền-tảng>/retest_<timestamp>/retest_report.md`. Bug cũ nằm thẳng ở `docs/bugs/<module>/` thì lùi 2 cấp.
+
+**Đồng bộ cột `Trạng thái` ở danh mục `docs/bugs/README.md`** — sửa đúng dòng của bug (và thêm dòng cho bug regression mới), dùng từ khoá `scripts/bugs-viewer` nhận:
+
+| Kết quả retest | Ghi vào cột `Trạng thái` |
+|---|---|
+| ✅ FIXED | `🟢 Đã đóng (retest <DD-MM-YYYY>)` |
+| ❌ NOT_FIXED | `🔴 **Đang mở** — NOT_FIXED <DD-MM-YYYY>` |
+| 🟡 PARTIAL | `🔴 **Đang mở** — PARTIAL <DD-MM-YYYY>` |
+| ⚠️ CANNOT_VERIFY | `⚠️ Cần rà lại — CANNOT_VERIFY <DD-MM-YYYY>` |
+
+Bỏ bước này thì danh mục vẫn báo bug đã FIXED là *Đang mở* — người đọc danh mục (hoặc bugs-viewer khi chỉ nạp danh mục) thấy sai trạng thái.
 
 Bug **đẩy lên Jira** → cập nhật trạng thái tương ứng qua `skills-jira-integration`; **không** tự đóng ticket, chỉ chuyển sang trạng thái chờ xác nhận trừ khi user cho phép rõ ràng.
 
@@ -217,6 +230,7 @@ Bug **đẩy lên Jira** → cập nhật trạng thái tương ứng qua `skill
 - [ ] Mode FULL: đã ghi rõ phạm vi regression đã chọn **và phần cố ý bỏ**
 - [ ] TC regression FAIL đã tách thành **bug mới**, không gộp vào bug cũ
 - [ ] Đã thêm dòng vào Lịch sử retest của bug gốc, **không** sửa nội dung gốc
+- [ ] Đã cập nhật cột `Trạng thái` của bug trong `docs/bugs/README.md` khớp kết quả retest
 - [ ] Dữ liệu test đã dọn (môi trường dùng chung)
 
 **Báo cáo cho user:** kết quả từng bug (FIXED/NOT_FIXED/PARTIAL/CANNOT_VERIFY) · số regression phát hiện · bug đề xuất đóng · bug đề xuất mở mới · khuyến nghị có nên đưa fix này lên production không.

@@ -21,7 +21,7 @@ skills:
 >
 > ❌ **KHÔNG dùng** mục 3.1 (UI Recon web), 3.5 (Mobile Recon), 7.2 (luật cấm gọi API là của nhánh UI).
 
-Đây là bản API của `/generate-requirements-from-website`: **tầng module**, đầu ra là `requirements_<module>.md` có mã REQ để tầng test case (`/generate-testcases-api`) và `/generate-traceability-matrix` neo vào.
+Đây là bản API của `/generate-requirements-from-website`: **tầng module**, đầu ra là `REQUIREMENTS_<TÊN_MODULE>_SUMMARY.md` có mã REQ để tầng test case (`/generate-testcases-api`) và `/generate-traceability-matrix` neo vào.
 
 ---
 
@@ -49,7 +49,7 @@ skills:
 | File OpenAPI `.json`/`.yaml` · Postman collection `.json` | ✅ Chạy tiếp |
 | `.docx` / `.pdf` mô tả endpoint (bảng method/path, JSON mẫu, bảng mã lỗi) | ✅ Chạy tiếp theo skill **3.4.6** |
 | Jira ticket / user story về một tính năng API | ⛔ Route `/analyze-requirement-document` (có Ticket ID) hoặc `/update-requirements-from-ticket` (module đã có tài liệu) |
-| Sản phẩm đầu ra của workflow khác (`requirements_*.md`, `api_map.md`, `test_cases_*.md`) | ⛔ **DỪNG, hỏi ý định thật** — không sinh bản diễn đạt lại của tài liệu đã có. Riêng `api_map.md`: nếu user muốn "sinh REQ từ bản đồ này" → chạy tiếp, dùng nó làm đầu vào ở Bước 1 |
+| Sản phẩm đầu ra của workflow khác (`REQUIREMENTS_<TÊN_MODULE>_SUMMARY.md`, `requirements_*.md`, `api_map.md`, `TEST_CASES_<TÊN_MODULE>_SUMMARY.md`, `test_cases_*.md`) | ⛔ **DỪNG, hỏi ý định thật** — không sinh bản diễn đạt lại của tài liệu đã có. Riêng `api_map.md`: nếu user muốn "sinh REQ từ bản đồ này" → chạy tiếp, dùng nó làm đầu vào ở Bước 1 |
 | Chỉ có base URL, **không** có spec hay tài liệu nào | ⛔ Hỏi user nguồn spec. Hệ thống có web → REQ server-side lấy qua tầng network của `/generate-requirements-from-website` (skill 3.1.1). **Không** dò endpoint mù |
 
 **0.2 — Đặc tả thuộc hệ thống nào, ghi vào đâu:**
@@ -59,7 +59,7 @@ skills:
 
 | Tình huống | Thư mục đầu ra | Prefix |
 |---|---|---|
-| API là **mặt khác** của hệ thống đã có web/app trong repo | `docs/requirements/<module>/api/requirements_<module>_api.md` + index `requirements_<module>.md` — **cùng thư mục module** với web/mobile | **Prefix của module đã có** (skill 2.2) |
+| API là **mặt khác** của hệ thống đã có web/app trong repo | `docs/requirements/<module>/api/requirements_<module>_api.md` + index `REQUIREMENTS_<TÊN_MODULE>_SUMMARY.md` — **cùng thư mục module** với web/mobile | **Prefix của module đã có** (skill 2.2) |
 | Hệ thống **chỉ có API**, là hệ thống đầu tiên của repo | `docs/requirements/<module>/api/` + index | Prefix mới, chốt ở tầng khám phá |
 | Hệ thống **chỉ có API**, repo đã có hệ thống khác | `docs/requirements/_<hệ-thống>/<module>/api/` + index | `REQ-<HỆ_THỐNG>-<MODULE>-<nn>` (CLAUDE.md mục 6b) |
 | Không chắc API có thuộc hệ thống đang có hay không | ⛔ **Hỏi user một câu** — đoán sai là hoặc nhân đôi REQ, hoặc trộn hai hệ thống |
@@ -80,7 +80,7 @@ Công bố ngay câu đầu tiên: *"Sinh REQ cho module `<PREFIX>` — nguồn 
 
 1. **Bản đồ:** phần của module trong `api_map.md` — danh mục operation, ma trận auth, phát hiện `F-nn`, ambiguity
 2. **Spec snapshot:** mọi operation thuộc tag của module — **resolve `$ref`** khi trích schema request/response. Postman: mọi request trong folder. Tài liệu văn bản: đúng các mục/bảng phủ module, ghi vị trí
-3. **Tài liệu requirements đã có của module** (`requirements_<module>.md`), nếu có:
+3. **Tài liệu requirements đã có của module** (`REQUIREMENTS_<TÊN_MODULE>_SUMMARY.md`), nếu có:
    - Lấy **mã kế tiếp** (skill 2.1) — REQ API đánh **tiếp**, không mở dải riêng
    - Liệt kê REQ web/mobile có rule **nằm ở server** (khoá tài khoản, trùng email, giới hạn độ dài) — ở Bước 3 sẽ **mở rộng nền tảng** cho REQ đó thay vì sinh REQ mới
 4. **Tài liệu nghiệp vụ khác** user đưa (spec chức năng, ticket) → đối chiếu theo skill 3.3
@@ -119,11 +119,11 @@ Theo skill **3.4.5** (dữ kiện nào thành REQ nào) và **3.4.7** (mục 6 �
 | Tình huống | Xử lý |
 |---|---|
 | Rule API **trùng** một REQ đã có, và gọi thật cho kết quả khớp | **Không** cấp mã mới — REQ cũ đang ở `web/` / `mobile/` thì **chuyển dòng lên index**, cột `Nền tảng` thêm `API`; đã ở index thì chỉ sửa cột. Nhật ký loại `🟢 Thêm` · *"Mở rộng nền tảng: + API"* |
-| Rule trùng nhưng hành vi **khác** (UI chặn, API nhận) | REQ riêng ở `api/` + `AMB-XX` 🔴 *"cố ý hay lỗi?"* — mặc định nghi là lỗi, thường là lỗ hổng bỏ qua validation phía client |
+| Rule trùng nhưng hành vi **khác** (UI chặn, API nhận) | REQ riêng ở `api/` + `AMB-<MODULE>-XX` 🔴 *"cố ý hay lỗi?"* — mặc định nghi là lỗi, thường là lỗ hổng bỏ qua validation phía client |
 | Module cũ chưa có tầng nền tảng (tài liệu một file) | Chuyển một lần theo skill mục 5.3 (REQ chỉ áp web sang `web/`, mã giữ nguyên, ghi Nhật ký) rồi mới ghi phần API |
 | Rule chỉ có ở API | REQ mới nối tiếp mã, ghi ở `api/` |
 
-**Lệch pha spec ↔ thực tế:** REQ theo spec, `Nguồn` = `Spec — ❌ lệch thực tế (F-nn)`, `AMB-XX` 🔴 ghi nguyên văn cả hai (skill 3.4.5). Không hạ REQ theo hành vi thật.
+**Lệch pha spec ↔ thực tế:** REQ theo spec, `Nguồn` = `Spec — ❌ lệch thực tế (F-nn)`, `AMB-<MODULE>-XX` 🔴 ghi nguyên văn cả hai (skill 3.4.5). Không hạ REQ theo hành vi thật.
 
 ### Bước 4: Cổng Tự Soát REQ (skill 4.3) — và 4 điểm riêng của API
 
@@ -137,7 +137,7 @@ Chạy đủ 9 câu của skill 4.3, **cộng**:
 ### Bước 5: Ghi file & cập nhật danh mục
 
 1. **Đếm REQ của file API** → áp bảng ngưỡng skill 5.1. File API lớn thường vượt 25 REQ → Phân rã Story theo **nhóm tài nguyên** (VD `/users` · `/users/{id}/roles`); vượt 80 thì chia tiếp vào `api/stories/`
-2. **Ghi** `api/requirements_<module>_api.md` đúng thư mục đã chốt ở Bước 0.2 (Endpoint Catalog · REQ chỉ áp API · Field Spec JSON · Validation · `Nguồn spec` + `Môi trường gọi thử`), và cập nhật **index** `requirements_<module>.md` (REQ chuyển lên dùng chung · dòng `Nền tảng` · `## Bản đồ tài liệu` thêm dòng API · AMB/RISK · Nhật ký). Chưa có index → tạo trước (skill 5.3)
+2. **Ghi** `api/requirements_<module>_api.md` đúng thư mục đã chốt ở Bước 0.2 (Endpoint Catalog · REQ chỉ áp API · Field Spec JSON · Validation · `Nguồn spec` + `Môi trường gọi thử`), và cập nhật **index** `REQUIREMENTS_<TÊN_MODULE>_SUMMARY.md` (REQ chuyển lên dùng chung · dòng `Nền tảng` · `## Bản đồ tài liệu` thêm dòng API · AMB/RISK · Nhật ký). Chưa có index → tạo trước (skill 5.3)
 3. **Danh mục** `README.md` (của hệ thống tương ứng): `Nền tảng` thêm `API ✅` · `Trạng thái recon` · `REQ đã dùng` · `Mã kế tiếp` · `AMB treo` · `Cập nhật`
 4. **Đối chiếu danh mục** với thư mục thực tế — đúng khối "Đối chiếu danh mục" của `/generate-requirements-from-website`
 5. **`api_map.md`:** bảng module cột `Dải REQ` cập nhật dải vừa cấp · 1 dòng Nhật ký khám phá nếu phát hiện lệch so với bản đồ
@@ -167,7 +167,7 @@ Chạy đủ 9 câu của skill 4.3, **cộng**:
 
 ```
 /discover-system (nhánh API) ──→ /generate-requirements-from-api ──→ /generate-testcases-api ──→ /generate-automation-api
-       api_map.md                    requirements_<module>.md        test_cases_<module>_api.md    code + reports/
+       api_map.md                    REQUIREMENTS_<TÊN_MODULE>_SUMMARY.md        test_cases_<module>_api.md    code + reports/
 ```
 
 | Sau khi xong | Workflow tiếp theo |

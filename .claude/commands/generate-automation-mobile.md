@@ -47,7 +47,7 @@ Workflow chạy trên **device/emulator thật** qua Appium MCP: thu locator t�
 
 | Input | Mode | Bắt buộc? | Ghi chú |
 |---|---|---|---|
-| **File test cases mobile** | TC | ⭐ | Đưa file **index** `test_cases_<module>.md` → theo `## Bản đồ tài liệu` chỉ lấy file `mobile/` |
+| **File test cases mobile** | TC | ⭐ | Đưa file **index** `TEST_CASES_<TÊN_MODULE>_SUMMARY.md` → theo `## Bản đồ tài liệu` chỉ lấy file `mobile/` |
 | **Flow cần automate** | FLOW | ⭐ | Mô tả từng bước bằng lời |
 | **File app** (`.apk` / `.ipa` / `.app`) hoặc app đã cài trên device | Cả hai | ⭐ | Kèm `appPackage`/`appActivity` (Android) hoặc `bundleId` (iOS) nếu app đã cài |
 | **Device/emulator** | Cả hai | ⭐ | Tên device, hoặc để agent liệt kê bằng `select_device` |

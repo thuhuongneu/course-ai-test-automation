@@ -25,13 +25,15 @@ Workflow này trả lời đúng ba câu hỏi mà PM/khách hàng hỏi trướ
 
 ## Bước 0: Chốt phạm vi & tiêu chí (CHECKPOINT — hỏi user)
 
-| Cần chốt | Ghi chú |
-|---|---|
-| **Mốc báo cáo** | Release v2.4 · Sprint 12 · UAT đợt 2 — dùng làm tiêu đề |
-| **Phạm vi module** | Module nào nằm trong đợt release này. ⚠️ Module **ngoài** phạm vi vẫn phải nêu ở mục 2 nếu chưa test, nhưng không tính vào tiêu chí #7 |
-| **Build / Version** | Bắt buộc — báo cáo không gắn build là báo cáo không dùng được |
-| **Tiêu chí exit của dự án** | Có thì dùng. **Không có → dùng bộ mặc định trong skill và GHI RÕ là mặc định của agent, cần PM xác nhận** |
-| **Người nhận báo cáo** | PM nội bộ hay khách hàng — quyết định mức chi tiết kỹ thuật |
+> **Đọc Master Test Plan trước khi hỏi.** Mốc đã có `docs/test-plans/test_plan_<mốc>.md` (slug chữ thường không dấu, VD `release_v2.4`) thì phạm vi, tiêu chí exit và người nhận **đã được công bố** — lấy từ plan, chỉ hỏi phần plan để `❓`.
+
+| Cần chốt | Ghi chú | Có plan thì lấy ở |
+|---|---|---|
+| **Mốc báo cáo** | Release v2.4 · Sprint 12 · UAT đợt 2 — dùng làm tiêu đề và slug `<mốc>` của tên file | Tên file plan |
+| **Phạm vi module × nền tảng** | Cặp module × nền tảng nào nằm trong đợt release này. ⚠️ Module **ngoài** phạm vi vẫn phải nêu ở mục 2 nếu chưa test, nhưng không tính vào tiêu chí #7 | Mục 2.1 · 2.2 |
+| **Build / Version** | Bắt buộc — báo cáo không gắn build là báo cáo không dùng được | Hỏi user — build thực tế có thể khác build dự kiến trong plan |
+| **Tiêu chí exit của dự án** | Thứ tự nguồn theo mục **Tiêu chí Exit** của skill: plan → user → bộ mặc định (**GHI RÕ là mặc định của agent, cần PM xác nhận**) | Mục 4.2 |
+| **Người nhận báo cáo** | PM nội bộ hay khách hàng — quyết định mức chi tiết kỹ thuật | Mục 2.4 |
 
 ⏸️ **Chốt xong mới sang Bước 1.** Đây là bước duy nhất bắt buộc hỏi user; các bước sau agent tự chạy.
 
@@ -41,12 +43,16 @@ Workflow này trả lời đúng ba câu hỏi mà PM/khách hàng hỏi trướ
 
 Glob theo bảng Input của skill, **ghi lại đường dẫn từng file** để làm cột nguồn trong báo cáo:
 
-1. `docs/executions/*/run_*/execution_report.md` — kết quả manual từng module
-2. `docs/executions/*/retest_*/retest_report.md` — bug đã verify + regression phát sinh
-3. `docs/bugs/README.md` (danh mục) rồi `docs/bugs/<module>/<nền-tảng>/BUG_*.md` — đọc `Severity`, `Lịch sử retest` để biết bug nào còn mở
-4. `docs/requirements/README.md` — **bắt buộc**, lấy module còn ⬜/🟨/⏸️
-5. `traceability_matrix.md` — nếu có
-6. `reports/` — kết quả automation, nếu có
+1. `docs/test-plans/test_plan_<mốc>.md` — nếu có: tiêu chí exit (4.2, gồm bảng bổ sung) · mục tiêu (1.1) · phạm vi (2.1, 2.2) · lịch & ước lượng (7.1, 7.2) · rủi ro dự án (8.1)
+1b. `docs/executions/test_progress_<mốc>_*.md` — nếu có: chỉ số từng kỳ, thời lượng trở ngại, rủi ro đã xảy ra, sai lệch so với lịch
+2. `docs/executions/<module>/<nền-tảng>/run_*/execution_report.md` — kết quả manual từng module × nền tảng
+3. `docs/executions/<module>/<nền-tảng>/retest_*/retest_report.md` — bug đã verify + regression phát sinh
+4. `docs/bugs/README.md` (danh mục) rồi `docs/bugs/<module>/<nền-tảng>/BUG_*.md` — đọc `Severity`, `Lịch sử retest` để biết bug nào còn mở
+5. `docs/requirements/README.md` — **bắt buộc**, lấy module còn ⬜/🟨/⏸️
+6. `traceability_matrix.md` — nếu có
+7. `reports/` — kết quả automation, nếu có
+
+> 📂 Mục 2–4 quét **cả** kiểu cũ không có tầng nền tảng (`docs/executions/<module>/run_*/` · `docs/bugs/<module>/BUG_*.md`) — tài liệu cũ không bị di chuyển, bỏ sót là mất lần chạy và bug.
 
 **Xử lý dữ liệu thiếu:**
 
@@ -101,7 +107,7 @@ Theo **Report Template** trong skill, đủ 9 mục theo đúng thứ tự:
 | 8. Yếu tố cản trở & Bài học | Sau kết quả, trước phụ lục — đọc xong mới hiểu vì sao số ra như vậy |
 | 9. Phụ lục — Ánh xạ chuẩn | Cuối cùng, dành cho người nghiệm thu/audit chứ không phải người đọc thường |
 
-> **Mục 8 lấy dữ liệu từ đâu:** BLOCKED trong `execution_report.md` (lý do bị chặn), `retest_report.md` (bản fix nào gây regression), và mục Rủi ro của Master Test Plan (rủi ro nào đã thành hiện thực). **Không hỏi user** những gì có trong file — chỉ hỏi phần thời lượng nếu file không ghi.
+> **Mục 8 lấy dữ liệu từ đâu:** BLOCKED trong `execution_report.md` (lý do bị chặn), `retest_report.md` (bản fix nào gây regression), mục 8.1 *Rủi ro dự án* của `docs/test-plans/test_plan_<mốc>.md` (rủi ro nào đã thành hiện thực), và mục 4 · 5 của các `test_progress_<mốc>_*.md` (trở ngại kèm **thời lượng**, rủi ro 🔴 đã xảy ra). **Sai lệch lịch/công sức** so với plan 7.1 · 7.2 cũng đưa vào mục này. **Không hỏi user** những gì có trong file — chỉ hỏi phần thời lượng nếu file không ghi.
 
 > **Chuẩn tham chiếu:** báo cáo bám cấu trúc **ISO/IEC/IEEE 29119-3 — Test Completion Report**. Xem mục *Chuẩn tham chiếu* trong skill trước khi viết mục 9. Ghi **tên mục** chuẩn, **không** ghi số điều khoản; **không** tuyên bố "tuân thủ".
 
@@ -125,8 +131,10 @@ Nhắc user: file này gửi ra ngoài được — kiểm lại lần cuối kh
 ## Mối quan hệ với workflows khác
 
 ```
-/execute-test-cases ──┐
-/retest-fixed-bugs  ──┤
+/generate-test-progress-report ── số liệu từng kỳ ──────┐
+/generate-master-test-plan ── công bố tiêu chí exit ────┤
+/execute-test-cases ──┐                                 │
+/retest-fixed-bugs  ──┤                                 ▼
 /create-bug-report  ──┼──→  /generate-test-summary-report  ──→  PM / PO / khách hàng
 /generate-traceability-matrix ──┘                │
                                                  └──→ mở scripts/execution-viewer/bundle.html để xem trực quan

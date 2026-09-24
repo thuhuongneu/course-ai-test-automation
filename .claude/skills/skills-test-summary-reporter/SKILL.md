@@ -49,7 +49,13 @@ Báo cáo này đưa ra **khuyến nghị go/no-go kèm căn cứ**. Quyết đ�
 
 ⛔ **Bắt buộc xác định tiêu chí exit trước khi nhìn kết quả.** Nhìn số rồi mới đặt ngưỡng là hợp thức hoá kết quả, không phải đánh giá.
 
-Hỏi user tiêu chí của dự án. Không có thì dùng bộ mặc định dưới đây và **ghi rõ trong báo cáo là bộ mặc định của agent, cần PM xác nhận**:
+**Nguồn tiêu chí, theo thứ tự:**
+
+1. **Master Test Plan của mốc** — `docs/test-plans/test_plan_<mốc>.md` mục **4.2**, gồm **cả bảng mặc định lẫn bảng *Tiêu chí bổ sung của dự án*** (#8 trở đi). Có plan thì lấy đúng bộ đã công bố, **không hỏi lại**. Plan đánh dấu *bộ mặc định chờ PM xác nhận* mà chưa có người duyệt → báo cáo vẫn ghi "chưa được xác nhận". Lịch sử thay đổi của plan cho thấy tiêu chí bị đổi **sau** ngày bắt đầu thực thi → nêu ra ở mục 3
+2. Không có plan → hỏi user tiêu chí của dự án
+3. Không có cả hai → dùng bộ mặc định dưới đây và **ghi rõ trong báo cáo là bộ mặc định của agent, cần PM xác nhận**
+
+`/generate-master-test-plan` chép **nguyên văn** bảng này vào mục 4.2 của plan — sửa bảng ở đây thì plan lập sau tự theo:
 
 | # | Tiêu chí mặc định | Ngưỡng |
 |---|---|---|
@@ -59,7 +65,11 @@ Hỏi user tiêu chí của dự án. Không có thì dùng bộ mặc định d
 | 4 | Pass rate toàn bộ TC đã chạy | ≥ 90% |
 | 5 | Tỷ lệ **BLOCKED** | ≤ 5% |
 | 6 | REQ mức Critical có ít nhất 1 TC **PASS** | 100% |
-| 7 | Module trong phạm vi release đã có TC và đã chạy | 100% |
+| 7 | Module trong phạm vi release đã có TC và đã chạy — tính trên **từng cặp module × nền tảng** trong phạm vi | 100% |
+
+> Tiêu chí #7 chấm theo **cặp module × nền tảng**: module có web đã chạy nhưng mobile trong phạm vi chưa chạy thì cặp mobile là **chưa đạt** — không được tính đủ nhờ lần chạy web.
+
+> **Dừng khi hết thời gian/ngân sách** (ISTQB CTFL v4.0 mục 5.1.3) — hợp lệ khi người có quyền đã **chấp nhận bằng văn bản** rủi ro phát hành. Báo cáo vẫn chấm tiêu chí nào **Không đạt**, và ghi thêm *ai chấp nhận, ngày nào, văn bản nào* — **không** đổi thành Đạt.
 
 Mỗi tiêu chí chấm **Đạt / Không đạt / Không áp dụng**, kèm số thực tế. Chấm "gần đạt" là không được — 94.8% so với ngưỡng 95% là **không đạt**, có thể chấp nhận nhưng phải ghi là ngoại lệ có người duyệt.
 
@@ -69,20 +79,24 @@ Mỗi tiêu chí chấm **Đạt / Không đạt / Không áp dụng**, kèm s�
 
 | Nguồn | Lấy gì | Bắt buộc |
 |---|---|---|
-| `docs/executions/*/run_*/execution_report.md` | PASS/FAIL/BLOCKED/SKIPPED từng module | ✅ |
-| `docs/executions/*/retest_*/retest_report.md` | Bug đã verify fix · regression phát sinh | Nếu có |
-| `docs/bugs/README.md` + `docs/bugs/<module>/<nền-tảng>/BUG_*.md` | Bug đang mở theo Severity · Lịch sử retest | ✅ |
+| `docs/test-plans/test_plan_<mốc>.md` | Tiêu chí exit đã công bố (mục 4.2) · mục tiêu kiểm thử (1.1) · phạm vi module × nền tảng (2.1) · ngoài phạm vi (2.2) · lịch & ước lượng công sức (7.1 · 7.2) · rủi ro dự án (8.1) | Nếu có |
+| `docs/executions/test_progress_<mốc>_*.md` | Chỉ số từng kỳ · **thời lượng trở ngại** · rủi ro đã xảy ra · sai lệch lịch — ISTQB CTFL v4.0 mục 5.3.2: báo cáo tổng hợp *"uses test progress reports"* | Nếu có |
+| `docs/executions/<module>/<nền-tảng>/run_*/execution_report.md` · kiểu cũ `docs/executions/<module>/run_*/` | PASS/FAIL/BLOCKED/SKIPPED từng module × nền tảng | ✅ |
+| `docs/executions/<module>/<nền-tảng>/retest_*/retest_report.md` · kiểu cũ `docs/executions/<module>/retest_*/` | Bug đã verify fix · regression phát sinh | Nếu có |
+| `docs/bugs/README.md` + `docs/bugs/<module>/<nền-tảng>/BUG_*.md` · kiểu cũ `docs/bugs/<module>/BUG_*.md` | Bug đang mở theo Severity · Lịch sử retest | ✅ |
 | `docs/requirements/README.md` | **Module chưa recon** — vùng mù, mục 1 của báo cáo | ✅ |
 | `traceability_matrix.md` | Độ phủ REQ ↔ TC ↔ Automation | Nếu có |
 | Report automation trong `reports/` | Kết quả suite tự động | Nếu có |
 
 > Thiếu `docs/bugs/` (đội dùng Jira) → lấy qua `skills-jira-integration`, đừng bỏ trống mục bug.
+>
+> 📂 Tài liệu sinh trước khi có tầng nền tảng **không** bị di chuyển — quét **cả** `<module>/<nền-tảng>/` lẫn `<module>/`, nếu không báo cáo sẽ thiếu lần chạy và bug của module làm theo kiểu cũ. Lần chạy kiểu cũ không ghi nền tảng → tính là `web` nếu execution report chạy trên trình duyệt, ngược lại ghi `—` và nêu ở mục 2.
 
 ---
 
 ## Chuẩn tham chiếu
 
-Báo cáo này tương ứng với **ISO/IEC/IEEE 29119-3 — Test Completion Report** (chuẩn hiện hành về tài liệu kiểm thử, thay thế IEEE 829 đã withdrawn). Cặp đôi của nó là Master Test Plan do `/generate-master-test-plan` sinh ra: **plan công bố tiêu chí trước, report chấm lại sau**.
+Báo cáo này tương ứng với **ISO/IEC/IEEE 29119-3 — Test Completion Report** (chuẩn hiện hành về tài liệu kiểm thử, thay thế họ IEEE 829 — bản 829-2008 đã bị thay thế, *superseded*). Cặp đôi của nó là Master Test Plan do `/generate-master-test-plan` sinh ra: **plan công bố tiêu chí trước, report chấm lại sau**.
 
 | Mục báo cáo | ISO/IEC/IEEE 29119-3 — Test Completion Report |
 |---|---|
@@ -113,7 +127,7 @@ Báo cáo này tương ứng với **ISO/IEC/IEEE 29119-3 — Test Completion Re
 | Phạm vi báo cáo | <module nào, build nào> |
 | Build / Version | v2.4.3 |
 | Môi trường | Staging — `<URL>` |
-| Khoảng thời gian | 2026-08-01 → 2026-08-12 |
+| Khoảng thời gian | 01-08-2026 → 12-08-2026 |
 | Người lập | <tên QA> (agent hỗ trợ) |
 | Nguồn dữ liệu | 6 execution report · 2 retest report · 14 bug report |
 | Cấu trúc tài liệu | Biên soạn **theo cấu trúc** ISO/IEC/IEEE 29119-3 — Test Completion Report · ánh xạ ở mục 9 |
@@ -128,7 +142,7 @@ Báo cáo này tương ứng với **ISO/IEC/IEEE 29119-3 — Test Completion Re
 
 **Điều kiện kèm theo:**
 1. Module **Báo cáo** chưa được kiểm thử (0 TC) — chỉ release được nếu module này chưa mở cho người dùng cuối
-2. BUG_CUST_1785700456 (🟠 Major — search wildcard sai) chưa fix; workaround: người dùng tìm bằng từ khoá không chứa `%`
+2. BUG_customers_1785700456_TC012 (🟠 Major — search wildcard sai) chưa fix; workaround: người dùng tìm bằng từ khoá không chứa `%`
 
 **Rủi ro nếu vẫn release:** người dùng dùng ký tự `%` trong tìm kiếm sẽ nhận kết quả rỗng và tưởng mất dữ liệu → nguy cơ ticket hỗ trợ tăng.
 
@@ -192,9 +206,9 @@ Báo cáo này tương ứng với **ISO/IEC/IEEE 29119-3 — Test Completion Re
 
 | Bug ID | Severity | Module | Tóm tắt | Workaround | Retest gần nhất |
 |---|---|---|---|---|---|
-| BUG_CUST_1785700456 | 🟠 Major | Khách hàng | Search ký tự `%` trả 0 kết quả | Có | — (chưa fix) |
+| BUG_customers_1785700456_TC012 | 🟠 Major | Khách hàng | Search ký tự `%` trả 0 kết quả | Có | — (chưa fix) |
 
-**⚠️ Regression phát sinh trong kỳ:** 1 — BUG_CUST_1785700456 sinh ra từ chính bản fix của BUG_CUST_1785612000.
+**⚠️ Regression phát sinh trong kỳ:** 1 — BUG_customers_1785700456_TC012 sinh ra từ chính bản fix của BUG_customers_1785612000_TC011.
 Đây là tín hiệu cần chú ý: fix ở tầng search đang có tác dụng phụ, nên review kỹ vùng này trước khi release.
 
 ---
@@ -215,7 +229,7 @@ Báo cáo này tương ứng với **ISO/IEC/IEEE 29119-3 — Test Completion Re
 
 | Ưu tiên | Việc | Ai làm | Command |
 |---|---|---|---|
-| 🔴 Trước release | Fix BUG_CUST_1785700456 hoặc PM duyệt ngoại lệ | Dev / PM | — |
+| 🔴 Trước release | Fix BUG_customers_1785700456_TC012 hoặc PM duyệt ngoại lệ | Dev / PM | — |
 | 🟠 Trước release | Xin tài khoản Manager để khảo sát module Báo cáo | QA | `/generate-requirements-from-website` |
 | 🟡 Sprint sau | Bổ sung TC cho 4 REQ chưa phủ | QA | `/generate-testcases-from-requirements` |
 

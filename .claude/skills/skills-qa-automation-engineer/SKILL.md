@@ -229,17 +229,17 @@ Triggers when user asks:
 
 ---
 
-### Update existing automation from Impact Report (delta mode)
+### Update existing automation from Delta TC List (delta mode)
 
-> **Delegate:** skill **`skills-coverage-traceability`** để map TC ID ↔ script.
+> **Delegate:** skill **`skills-coverage-traceability`** để map TC ID ↔ script · recon theo nền tảng: **`skills-ui-debug-agent`** (web) · **`skills-mobile-debug-agent`** (mobile) · `skills-requirements-analyzer` mục 3.4.4 (API).
 
 Use workflow: `update-automation-from-impact`
 
-> Mắt xích **cuối** của chuỗi delta 3 tầng: `update-requirements-from-ticket` → `update-testcases-from-impact` → workflow này. Bỏ tầng giữa là sửa script theo kỳ vọng cũ — TC còn mô tả hành vi cũ thì script sửa xong vẫn sai mà vẫn xanh.
+> Mắt xích **cuối** của chuỗi delta 3 tầng: `update-requirements-from-ticket` → `update-testcases-from-impact` → workflow này. Đầu vào là file **`docs/testcases/<module>/impact/delta_tc_<TICKET-ID>.md`** do tầng giữa ghi ra — chỉ có Impact Report mà chưa có file này nghĩa là TC chưa đồng bộ, phải dừng. Bỏ tầng giữa là sửa script theo kỳ vọng cũ — TC còn mô tả hành vi cũ thì script sửa xong vẫn sai mà vẫn xanh.
 >
-> Requirements/TC đổi → sửa **đúng phần đổi** trong script đã có. 2 modes: PLAN (kế hoạch) và APPLY (sửa + chạy lại).
+> TC đổi → sửa **đúng phần đổi** trong script đã có, **tách theo nền tảng** của TC (web · mobile `@Android`/`@iOS` · API), mỗi nền tảng một lượt. 2 modes: PLAN (kế hoạch) và APPLY (sửa + chạy lại).
 >
-> ⚠️ Rule bất biến: **KHÔNG sinh lại cả module** (đó là `generate-automation-from-testcases`), **KHÔNG xoá file** cho TC bị archive, **KHÔNG bịa mapping** TC ↔ script.
+> ⚠️ Rule bất biến: **KHÔNG sinh lại cả module** (đó là `generate-automation-from-testcases`), **KHÔNG xoá file** cho TC 🗑️ Deprecated, **KHÔNG sửa script** của TC `⏸️ @NeedsVerify` chưa được sửa, **KHÔNG bịa mapping** TC ↔ script.
 
 Triggers when user asks:
 
@@ -570,7 +570,7 @@ Skill này **không** kèm file hồ sơ dự án để user điền sẵn. Agen
 | Cần biết | Lấy ở đâu | Ghi vào đâu |
 |---|---|---|
 | **Hệ thống có những module nào** (chưa biết gì về hệ thống) | `/discover-system` — crawl navigation cấp hệ thống | `docs/requirements/_discovery/system_map.md` + `README.md` |
-| Module X làm gì, luồng nào, field nào | **Recon UI thực tế** qua Playwright MCP — `/generate-requirements-from-website` (web) · qua Appium MCP — `/generate-requirements-from-mobile` (app) | `docs/requirements/<module>/requirements_<module>.md` |
+| Module X làm gì, luồng nào, field nào | **Recon UI thực tế** qua Playwright MCP — `/generate-requirements-from-website` (web) · qua Appium MCP — `/generate-requirements-from-mobile` (app) | `docs/requirements/<module>/REQUIREMENTS_<TÊN_MODULE>_SUMMARY.md` |
 | Mặt API của module X — endpoint, schema, auth | `/discover-system` nhánh API → `/generate-requirements-from-api` (Swagger · Scalar · Postman · tài liệu API .docx) | `docs/requirements/<module>/api/requirements_<module>_api.md` + index — một nghiệp vụ một prefix, một thư mục module trên mọi nền tảng |
 | Prefix module, mã REQ/TC kế tiếp | Đọc danh mục hiện có | `docs/requirements/README.md` · `docs/testcases/README.md` |
 | Business rules ẩn, known issues (CAPTCHA, OTP…) | Gặp khi recon / chạy test → ghi lại ngay | Mục "Ghi chú" của tài liệu module + Nhật ký thay đổi |

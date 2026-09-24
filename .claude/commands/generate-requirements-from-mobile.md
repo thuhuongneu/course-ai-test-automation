@@ -25,7 +25,7 @@ skills:
 >
 > ❌ **KHÔNG dùng** mục 3.1 / 3.1.1 (recon web qua DOM + network trình duyệt), 7.2 (luật riêng nhánh web), 3.4 (nhánh API).
 
-Đây là bản mobile của `/generate-requirements-from-website`: **tầng module**, đầu ra là `requirements_<module>.md` có mã REQ để tầng test case và `/generate-traceability-matrix` neo vào.
+Đây là bản mobile của `/generate-requirements-from-website`: **tầng module**, đầu ra là `REQUIREMENTS_<TÊN_MODULE>_SUMMARY.md` có mã REQ để tầng test case và `/generate-traceability-matrix` neo vào.
 
 ---
 
@@ -63,7 +63,7 @@ skills:
 
 1. `docs/requirements/README.md` — prefix của module · cột `Nền tảng` · mã kế tiếp. Chưa có file → tạo theo skill 5.7.1
 2. `docs/requirements/_discovery/system_map.md` — **sơ đồ điều hướng app** (đường đi tới màn hình, deep link) · **loại app đã nhận diện** · vùng chưa xác minh
-3. `docs/requirements/<module>/requirements_<module>.md` nếu đã có — **đọc hết REQ web/API trước khi mở app**. Đây là danh sách rule cần **đối chiếu** trên app, không phải khảo sát lại từ đầu
+3. `docs/requirements/<module>/REQUIREMENTS_<TÊN_MODULE>_SUMMARY.md` nếu đã có — **đọc hết REQ web/API trước khi mở app**. Đây là danh sách rule cần **đối chiếu** trên app, không phải khảo sát lại từ đầu
 4. Module chưa có trong danh mục → **dừng, đề nghị** `/discover-system` (mode ADD) để cấp prefix. Không tự đặt prefix ở đây
 
 **0.3 — Tài liệu kèm theo** (mockup Figma, spec màn hình, ticket): có → lập Bản đồ phủ tài liệu theo skill **3.3.1** trước khi mở app.
@@ -132,7 +132,7 @@ Theo **mục 6** của skill, khác nhánh web ở:
 | Tình huống | Xử lý |
 |---|---|
 | Rule đã có ở web/API, kiểm trên app **khớp** | **Không** cấp mã mới — REQ cũ đang ở `web/` (hoặc `api/`) thì **chuyển dòng lên index**, cột `Nền tảng` thêm `Android`; đã ở index thì chỉ sửa cột. Nhật ký `🟢 Thêm` · *"Mở rộng nền tảng: + Android"* · `TC cần xử lý` = `viết mới cho Android` |
-| Rule có nhưng app chạy **khác** (message khác, độ dài khác, không chặn) | REQ riêng ở `mobile/`, `Nền tảng` = `Android` + `AMB-XX` *"cố ý hay lỗi?"* — mặc định nghi là lỗi |
+| Rule có nhưng app chạy **khác** (message khác, độ dài khác, không chặn) | REQ riêng ở `mobile/`, `Nền tảng` = `Android` + `AMB-<MODULE>-XX` *"cố ý hay lỗi?"* — mặc định nghi là lỗi |
 | Rule chỉ có trên app | REQ mới nối tiếp mã, ghi ở `mobile/`, `Nền tảng` = `Android` |
 | Module cũ chưa có tầng nền tảng (tài liệu một file) | Chuyển một lần theo skill mục 5.3: REQ chỉ áp web sang `web/requirements_<module>_web.md`, evidence sang `web/evidence/`, mã giữ nguyên, ghi Nhật ký — rồi mới ghi phần mobile |
 | Lượt này là iOS, module đã có REQ `Android` | Kiểm từng REQ trên iOS: khớp → `Android · iOS` (vẫn ở `mobile/`); khác → REQ riêng. **Không** tự ghi `iOS` khi chưa kiểm |
@@ -149,7 +149,7 @@ Chạy đủ 9 câu của skill 4.3, **cộng**:
 ### Bước 5: Ghi file & cập nhật danh mục
 
 1. **Đếm REQ của file mobile** → bảng ngưỡng skill 5.1. Vượt ngưỡng thì chia tiếp thành `mobile/stories/` theo **Story nghiệp vụ**; **không** tách Android và iOS thành hai thư mục
-2. **Ghi** `docs/requirements/<module>/mobile/requirements_<module>_mobile.md` (REQ chỉ áp app · Field Spec · Validation · Yêu cầu riêng mobile · `Thiết bị khảo sát` · Danh mục Evidence) và cập nhật **index** `requirements_<module>.md` (REQ chuyển lên dùng chung · dòng `Nền tảng` · `## Bản đồ tài liệu` thêm dòng Mobile · AMB/RISK · Nhật ký). Module chưa có index → tạo index trước (skill 5.3)
+2. **Ghi** `docs/requirements/<module>/mobile/requirements_<module>_mobile.md` (REQ chỉ áp app · Field Spec · Validation · Yêu cầu riêng mobile · `Thiết bị khảo sát` · Danh mục Evidence) và cập nhật **index** `REQUIREMENTS_<TÊN_MODULE>_SUMMARY.md` (REQ chuyển lên dùng chung · dòng `Nền tảng` · `## Bản đồ tài liệu` thêm dòng Mobile · AMB/RISK · Nhật ký). Module chưa có index → tạo index trước (skill 5.3)
 3. **Danh mục** `docs/requirements/README.md`: cột `Nền tảng` cập nhật nền tảng vừa khảo sát (`Android ✅`) · `REQ đã dùng` · `Mã kế tiếp` · `AMB treo` · `Cập nhật`. `Trạng thái recon` tổng chỉ ✅ khi **mọi** nền tảng module có đều ✅
 4. **Đối chiếu danh mục** với thư mục thực tế — đúng khối "Đối chiếu danh mục" của `/generate-requirements-from-website`
 5. **`system_map.md`:** 1 dòng Nhật ký khám phá nếu lệch so với bản đồ (đường đi đổi, màn hình mới, loại app khác nhận diện ban đầu)
@@ -180,7 +180,7 @@ Chạy đủ 9 câu của skill 4.3, **cộng**:
 
 ```
 /discover-system (Bước 3-M) ──→ /generate-requirements-from-mobile ──→ /generate-testcases-manual-rbt ──→ /generate-automation-mobile
-   system_map.md (cây app)         requirements_<module>.md                test_cases_<module>.md               testId = TC ID
+   system_map.md (cây app)         REQUIREMENTS_<TÊN_MODULE>_SUMMARY.md                TEST_CASES_<TÊN_MODULE>_SUMMARY.md               testId = TC ID
 ```
 
 | Tình huống | Workflow |

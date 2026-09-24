@@ -21,7 +21,7 @@ Workflow đọc **file test case API**, sinh project automation (client · DTO �
 
 ```
 /discover-system (nhánh API) → /generate-requirements-from-api → /generate-testcases-api → /generate-automation-api
-        api_map.md                 requirements_<module>.md         test_cases_<module>_api.md     code + reports/
+        api_map.md                 REQUIREMENTS_<TÊN_MODULE>_SUMMARY.md         test_cases_<module>_api.md     code + reports/
 ```
 
 ## ⚠️ Nguyên tắc thực thi

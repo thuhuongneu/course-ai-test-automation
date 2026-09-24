@@ -84,9 +84,27 @@ Kích hoạt khi:
 - User dùng command `/update-testcases-from-impact`
 - User đưa **Impact Report** (từ `/update-requirements-from-ticket`) hoặc danh sách REQ đã đổi
 - User nói: "cập nhật TC theo ticket", "requirement đổi rồi, sửa TC", "TC nào bị ảnh hưởng", "đồng bộ lại bộ TC"
-- Module **đã có** `docs/testcases/<module>/test_cases_<module>.md` và yêu cầu vừa thay đổi
+- Module **đã có** `docs/testcases/<module>/TEST_CASES_<TÊN_MODULE>_SUMMARY.md` và yêu cầu vừa thay đổi
 
-> 🚨 **Dấu hiệu bắt buộc kiểm trước khi chọn QUICK/FULL RBT:** module đã có file TC chưa? Đã có mà vẫn chạy QUICK/FULL RBT là sinh bộ TC thứ hai, TC ID đánh lại từ `001`, và mọi `testId` trong automation trỏ về hư không.
+> 🚨 **Dấu hiệu bắt buộc kiểm trước khi chọn QUICK/FULL RBT:** module đã có file TC chưa? Đã có mà vẫn chạy QUICK/FULL RBT kiểu sinh mới là sinh bộ TC thứ hai, TC ID đánh lại từ `001`, và mọi `testId` trong automation trỏ về hư không. Xử lý theo mục **Module đã có bộ TC — chế độ BỔ SUNG** ngay dưới.
+
+### Module đã có bộ TC — chế độ BỔ SUNG (áp QUICK · FULL RBT)
+
+**Bước 0 của mọi lượt QUICK / FULL RBT:** kiểm `docs/testcases/<module>/TEST_CASES_<TÊN_MODULE>_SUMMARY.md` (hoặc tên cũ `test_cases_<module>.md`). Không có → sinh mới bình thường. **Có** → rẽ nhánh:
+
+| Tình huống | Làm gì |
+|---|---|
+| Requirements của REQ **đã có TC** vừa đổi | ⛔ Không sinh — chuyển **Mode DELTA** (`/update-testcases-from-impact`) |
+| Có REQ **chưa có TC** (REQ 🟢 mới, hoặc REQ 🔴 thiếu ở Bảng Đối Soát Coverage) | Chạy **BỔ SUNG**: phạm vi chỉ gồm các REQ đó |
+| User muốn **sinh lại cả module** | ⛔ Dừng, hỏi user. Chỉ được làm khi chưa có script / execution report / RTM nào trỏ vào bộ TC — cùng luật với *Đổi độ hạt của bộ TC đã có* |
+
+**Luật của chế độ BỔ SUNG:**
+
+- Phạm vi = REQ chưa có TC. **Không** chạm dòng TC đang có
+- TC ID **nối tiếp** dải đang dùng (đọc `Dải TC ID đã dùng` ở index) — không chèn giữa, không đánh lại
+- **Giữ độ hạt** của bộ TC đang có (GỘP/TÁCH), không theo tham số mặc định
+- Ghi **nối vào** file nền tảng / part hiện có (vượt ngưỡng thì mở part mới), cập nhật index: Bản đồ tài liệu · Bảng Đối Soát Coverage · Bảng 4 vòng (chỉ nhánh bị chạm) · dải TC ID · 1 dòng **Nhật ký thay đổi** kèm **mốc git** của file trước khi ghi
+- Quality Gate chạy trên **phần vừa sinh**, riêng tiêu chí 6 (Coverage) chạy trên **cả module**
 
 ### → Khi không rõ
 
@@ -166,7 +184,7 @@ Những thứ **chỉ DOM mới chốt được**: số `<option>` thật (kể 
 
 ### 6. Trạng thái phần tử — đọc kỹ ảnh, đừng chỉ đọc nhãn
 
-Checkbox **xám mờ = disabled**, khác hoàn toàn **không tick**. Phát hiện phần tử disabled trong ảnh nghĩa là có **business rule phụ thuộc** mà requirements có thể đã bỏ sót → sinh TC cho cả hai chiều (bật điều kiện → mở khoá; tắt điều kiện → khoá lại) và mở `AMB-XX`.
+Checkbox **xám mờ = disabled**, khác hoàn toàn **không tick**. Phát hiện phần tử disabled trong ảnh nghĩa là có **business rule phụ thuộc** mà requirements có thể đã bỏ sót → sinh TC cho cả hai chiều (bật điều kiện → mở khoá; tắt điều kiện → khoá lại) và mở `AMB-<MODULE>-XX`.
 
 ---
 
@@ -239,7 +257,7 @@ Steps viết bằng **thao tác người dùng làm được**, không phải l�
 
 Selector là tài sản của tầng automation, sống trong Page Object. Nhét `.dropdown-menu > li.header-logout` vào manual TC gây hai hại: tester không dùng được, và khi UI đổi thì selector sai nằm rải trong tài liệu TC không ai đi sửa.
 
-- Thông tin selector thu được lúc recon → ghi vào **`docs/requirements/<module>/requirements_<module>.md`** (mục kỹ thuật), workflow automation đọc từ đó
+- Thông tin selector thu được lúc recon → ghi vào **`docs/requirements/<module>/REQUIREMENTS_<TÊN_MODULE>_SUMMARY.md`** (mục kỹ thuật), workflow automation đọc từ đó
 - Manual TC chỉ mô tả **vị trí nhìn thấy**: "mục `Logout` cuối cùng trong menu ảnh đại diện góc trên bên phải"
 
 ### 7. Self-Quality Gate — tiêu chí bổ sung
@@ -275,13 +293,14 @@ Bộ TC thường dài 70–100+ dòng bảng. In toàn bộ ra chat khiến use
 docs/testcases/
 ├── README.md                                        ← DANH MỤC toàn hệ thống
 └── <module>/
-    ├── test_cases_<module>.md                       ← INDEX — TÊN FILE BẤT BIẾN · KHÔNG chứa dòng TC
+    ├── TEST_CASES_<TÊN_MODULE>_SUMMARY.md                       ← INDEX — TÊN FILE BẤT BIẾN · KHÔNG chứa dòng TC
     ├── web/test_cases_<module>_web.md               ← TC chạy trên web
     ├── mobile/test_cases_<module>_mobile.md         ← TC chạy trên app — tag @Android / @iOS
     ├── api/test_cases_<module>_api.md               ← TC gọi API
     ├── <nền-tảng>/parts/part_NN_<nền-tảng>_<slug>.md ← khi file nền tảng vượt ngưỡng
     ├── impact/impact_plan_<TICKET-ID>.md            ← Mode DELTA: kế hoạch sửa theo từng ticket (cấp module)
-    └── archive/test_cases_<module>_<nền-tảng>_vN.md ← phiên bản cũ, giữ để truy vết
+    ├── impact/delta_tc_<TICKET-ID>.md               ← Mode DELTA: TC đã sửa xong theo nền tảng — input của /update-automation-from-impact
+    ├── impact/automation_plan_<TICKET-ID>.md        ← do /update-automation-from-impact ghi — script đã sửa theo ticket
 ```
 
 **Tầng nền tảng — luật cứng:**
@@ -293,7 +312,7 @@ docs/testcases/
 | Mỗi TC nằm ở **đúng một** file nền tảng — TC là thứ được **chạy**, và mỗi lần chạy thuộc một nền tảng | Không có "TC dùng chung"; REQ dùng chung thì mỗi nền tảng một TC, cùng `REQ ID` |
 | **Dải TC ID chung toàn module**, đánh tiếp qua mọi file nền tảng | `CRM_CUST_TC_041` là duy nhất trong module dù nằm ở `web/` hay `mobile/` — RTM và `testId` của automation không phải biết đường dẫn |
 | Tên file nền tảng **mang hậu tố nền tảng** (`test_cases_<module>_web.md`, `part_NN_web_<slug>.md`) | `scripts/testcases-viewer` phân biệt tài liệu theo **tên file** — hai file trùng tên thì file nạp sau ghi đè file trước |
-| Bộ TC cũ chưa có tầng nền tảng | Không di chuyển cho tới khi Mode DELTA / sinh thêm chạm lại module → chuyển **một lần** vào file nền tảng, TC ID giữ nguyên, bản cũ vào `archive/`, ghi Nhật ký |
+| Bộ TC cũ chưa có tầng nền tảng | Không di chuyển cho tới khi Mode DELTA / sinh thêm chạm lại module → chuyển **một lần** vào file nền tảng, TC ID giữ nguyên, ghi **mốc git** của bản cũ vào Nhật ký |
 
 > ⚠️ **Dự án mới — BẮT BUỘC kiểm tra trước khi ghi bộ TC đầu tiên:** `docs/testcases/README.md` chưa tồn tại thì **tạo ngay** với bảng danh mục rỗng, rồi mới ghi TC và bổ sung dòng đầu tiên. Thiếu file này thì không ai biết prefix TC ID nào đã bị chiếm, và độ phủ REQ↔TC không có chỗ theo dõi.
 >
@@ -301,10 +320,11 @@ docs/testcases/
 
 | Quy tắc | Lý do |
 |---|---|
-| Tên index **luôn** `test_cases_<module>.md` | Mọi workflow phía sau (`/execute-test-cases`, `/review-testcases`, `/generate-automation-from-testcases`, `/generate-traceability-matrix`) đọc theo mẫu `docs/testcases/<module>/test_cases_<module>.md`. Đổi tên là vỡ chuỗi |
-| **KHÔNG** nhét số phiên bản vào tên index (`_v2`, `_new`…) | Phiên bản mới **thay thế** index; bản cũ chuyển vào `archive/` |
+| Tên index **luôn** `TEST_CASES_<TÊN_MODULE>_SUMMARY.md` — chữ IN HOA, `<TÊN_MODULE>` = tên thư mục module viết HOA, `-` đổi thành `_` (VD `login` → `LOGIN`, `customers` → `CUSTOMERS`) — **không phải** prefix REQ (`CUST`) | Mọi workflow phía sau (`/execute-test-cases`, `/review-testcases`, `/generate-automation-from-testcases`, `/generate-traceability-matrix`) đọc theo mẫu `docs/testcases/<module>/TEST_CASES_<TÊN_MODULE>_SUMMARY.md`. IN HOA để file tổng **khác hẳn** file nền tảng `test_cases_<module>_<nền-tảng>.md`. Đổi tên là vỡ chuỗi |
+| Tài liệu cũ còn index `test_cases_<module>.md` (quy ước trước 21-09-2026) | Đọc **nhận cả hai tên**. Lần đầu sinh/cập nhật chạm lại module → đổi tên **một lần** sang `TEST_CASES_<TÊN_MODULE>_SUMMARY.md`, sửa link trỏ tới, ghi Nhật ký |
+| **KHÔNG** nhét số phiên bản vào tên index (`_v2`, `_new`…) | Phiên bản mới **thay thế** index tại chỗ; bản cũ tra bằng **lịch sử git** |
 | Part đặt trong `<nền-tảng>/parts/`, đặt tên `part_NN_<nền-tảng>_<slug>.md` | `NN` có số 0 đứng đầu để sắp xếp đúng; slug mô tả nhóm chức năng; hậu tố nền tảng chống trùng tên file |
-| Mode DELTA sửa **tại chỗ** file nền tảng/part, bản trước khi sửa copy vào `archive/` (tên kèm nền tảng) | Giữ đúng một nguồn sự thật. Sinh `_improved` / `_v2` ở ngoài `archive/` là để lại hai bộ TC mà không ai biết bộ nào đang dùng |
+| Mode DELTA sửa **tại chỗ** file nền tảng/part, ghi **mốc git** của bản trước khi sửa. **KHÔNG** có thư mục `archive/`, **KHÔNG** chép bản cũ ra file nào | Giữ đúng một nguồn sự thật. Bản sao `_v2` / `archive/` là bộ TC thứ hai nằm cạnh bộ đang dùng — grep TC ID ra hai kết quả, viewer nạp nhầm, lệnh dọn dự án bỏ sót. Git đã giữ mọi phiên bản |
 
 **Ngưỡng tách:**
 
@@ -313,7 +333,7 @@ docs/testcases/
 | ≤ 40 TC ở độ hạt TÁCH · ≤ 50 TC ở độ hạt GỘP — **đếm theo từng nền tảng** | 1 file `<nền-tảng>/test_cases_<module>_<nền-tảng>.md`, không cần `parts/` |
 | File nền tảng vượt ngưỡng trên | Tách vào `<nền-tảng>/parts/part_01_<nền-tảng>_<slug>.md`, `part_02_...` — mỗi part dưới ngưỡng, **cắt tại ranh giới nhóm chức năng**, không cắt giữa nhóm |
 | Nhiều module | Mỗi module một thư mục riêng, KHÔNG gộp chung |
-| Mọi trường hợp | File `test_cases_<module>.md` **luôn là index** (xem mục 4) — TC chi tiết nằm hết trong file nền tảng / part |
+| Mọi trường hợp | File `TEST_CASES_<TÊN_MODULE>_SUMMARY.md` **luôn là index** (xem mục 4) — TC chi tiết nằm hết trong file nền tảng / part |
 
 > Ngưỡng đếm theo **số TC**, không theo dung lượng — người review đọc lần lượt từng TC, nên số TC mới là thứ quyết định một lượt review có kham nổi không.
 >
@@ -338,14 +358,14 @@ docs/testcases/
 
 ### 4. File index (luôn có)
 
-File `docs/testcases/<module>/test_cases_<module>.md` **là index** — giữ nguyên tên, không đổi thành `*_index.md`, **không** chứa dòng TC:
+File `docs/testcases/<module>/TEST_CASES_<TÊN_MODULE>_SUMMARY.md` **là index** — giữ nguyên tên, không đổi thành `*_index.md`, **không** chứa dòng TC:
 
 ```markdown
 # Test Cases — <Module> (tổng <N> TC · <K> nền tảng)
 
 | Thông tin | Nội dung |
 |---|---|
-| Nguồn requirement | [requirements_<module>.md](../../requirements/<module>/requirements_<module>.md) |
+| Nguồn requirement | [REQUIREMENTS_<TÊN_MODULE>_SUMMARY.md](../../requirements/<module>/REQUIREMENTS_<TÊN_MODULE>_SUMMARY.md) |
 | Dải TC ID đã dùng | `CRM_CUST_TC_001` → `CRM_CUST_TC_094` — chung mọi nền tảng |
 
 ## Bản đồ tài liệu
@@ -453,7 +473,7 @@ Cùng một module, cùng một mức bao phủ, số TC có thể chênh nhau *
 
 | Tình huống | Cách làm |
 |---|---|
-| Bộ TC vừa sinh, **chưa** có automation / execution report / RTM nào trỏ vào | Sinh lại ở độ hạt mới, TC ID đánh lại từ `001`, bản cũ chuyển vào `archive/`. Ghi lý do vào Nhật ký thay đổi |
+| Bộ TC vừa sinh, **chưa** có automation / execution report / RTM nào trỏ vào | Sinh lại ở độ hạt mới, TC ID đánh lại từ `001`, ghi **mốc git** của bản cũ. Ghi lý do vào Nhật ký thay đổi |
 | Đã có script `allure.label('testId', ...)`, execution report hoặc RTM trỏ vào | 🚫 **KHÔNG đổi độ hạt.** Đổi là cắt cả ba mối nối cùng lúc và không có cách phát hiện tự động. Muốn gọn hơn thì sinh **checklist** (Mode CHECKLIST) để chạy tay, giữ nguyên bộ TC làm nguồn cho automation |
 
 > 📌 Vì vậy **chốt độ hạt ở lượt sinh đầu tiên** là rẻ nhất. Agent phải nêu rõ độ hạt đang dùng ngay ở dòng kế hoạch batch đầu ra chat.
@@ -470,10 +490,11 @@ Sinh test cases **nhanh, đủ chất lượng** từ requirements/user stories 
 
 **Agent phải:**
 
+0. **Kiểm module đã có bộ TC chưa** — có thì rẽ nhánh theo mục [Module đã có bộ TC — chế độ BỔ SUNG](#module-đã-có-bộ-tc--chế-độ-bổ-sung-áp-quick--full-rbt)
 1. **Đọc và hiểu requirements** được cung cấp
    - Nếu requirements đã có mã REQ ID (từ `skills-requirements-analyzer`) → dùng nguyên mã đó
    - Nếu chưa có mã → agent tự gán `REQ-<MODULE>-<SỐ>` cho từng yêu cầu/rule trước khi sinh TC
-2. **Mở toàn bộ evidence** theo [Quy Tắc Đối Chiếu Evidence](#quy-tắc-đối-chiếu-evidence-bắt-buộc--áp-dụng-cả-3-modes-chạy-trước-batch-đầu-tiên) — liệt kê `docs/requirements/<module>/<nền-tảng>/evidence/` và `Read` từng ảnh. **Chưa làm xong bước này thì chưa được ghi dòng TC đầu tiên.** Ghi lại ảnh nào cắt cụt / vùng nào không có ảnh để dùng ở bước 10
+2. **Mở toàn bộ evidence** theo [Quy Tắc Đối Chiếu Evidence](#quy-tắc-đối-chiếu-evidence-bắt-buộc--áp-dụng-cả-4-modes-chạy-trước-batch-đầu-tiên) — liệt kê `docs/requirements/<module>/<nền-tảng>/evidence/` và `Read` từng ảnh. **Chưa làm xong bước này thì chưa được ghi dòng TC đầu tiên.** Ghi lại ảnh nào cắt cụt / vùng nào không có ảnh để dùng ở bước 10
 3. **Ghi nhận Assumptions (BẮT BUỘC khi requirement mơ hồ):**
    - QUICK mode không dừng hỏi Q&A → mọi điểm không rõ agent phải **ghi rõ giả định** đã dùng
    - Xuất mục "Assumptions" ngay đầu output: `ASM-XX | Điểm chưa rõ | Giả định đã áp dụng | TC bị ảnh hưởng`
@@ -503,24 +524,26 @@ Sinh test cases **nhanh, đủ chất lượng** từ requirements/user stories 
    - Localization & UTF-8 / Emoji
    - Keyboard Accessibility (A11y)
    - HTTP Status Codes (cho API TCs)
-9. **Xuất ra bảng Markdown** chuẩn có đầy đủ metadata cho Automation, sẵn sàng sync vào Google Sheets hoặc Jira/TestRail.
+9. **Xuất ra bảng Markdown** chuẩn có đầy đủ metadata cho Automation, sẵn sàng sync vào Google Sheets hoặc Jira/TestRail. Cột `Automation` chấm theo [Tiêu chí chấm cột Automation](references/automation_criteria.md), ghi mục `## Đối soát cột Automation` vào index.
 10. **Chạy Self-Quality Gate (11 Tiêu chí, 0–10):** Rà soát lại 100% test cases + đối soát coverage (6) + đối soát evidence (7) + **rà ngôn ngữ kiểm chứng** (8) + **rà đặc tính chất lượng ISO/IEC 25010** (9) + **đối soát loại kiểm thử 4 vòng** (10) trước khi xuất kết quả.
 
 ## Bảng Output Standard (chuẩn hóa đầy đủ Metadata)
 
 ```markdown
-| TC ID | REQ ID | Module | Risk Level | Test Scenario | Pre-Condition | Test Steps | Test Data | Expected Result | Priority | Automatable | Auto Type | Tags |
+| TC ID | REQ ID | Module | Risk Level | Test Scenario | Pre-Condition | Test Steps | Test Data | Expected Result | Priority | Automation | Auto Type | Tags |
 ```
 
 > **Giải thích Metadata:**
 > - **REQ ID:** Mã requirement mà TC này cover (`REQ-LOGIN-01`) — BẮT BUỘC, 1 TC có thể cover nhiều REQ (phân cách `,`). Đây là mắt xích truy vết để đối soát "đủ case" và chạy `/generate-traceability-matrix`
-> - **Risk Level:** `High` / `Medium` / `Low` — mức rủi ro của vùng chức năng TC này chạm tới. **KHÔNG được bỏ cột này**: `scripts/testcases-viewer` có cột Risk và cho sort theo nó, thiếu cột thì toàn bộ cột Risk hiện `—` và sort mất tác dụng
-> - **Automatable:** `Yes` / `No` / `Partial` (Độ khả thi để viết script tự động)
+> - **Risk Level:** `High` / `Medium` / `Low` — mức rủi ro của vùng chức năng TC này chạm tới, tương ứng mức `Cao` / `Trung bình` / `Thấp` của mục **Độ sâu theo rủi ro** (ô bảng ghi tiếng Anh vì viewer sort theo giá trị này). **KHÔNG được bỏ cột này**: `scripts/testcases-viewer` có cột Risk và cho sort theo nó, thiếu cột thì toàn bộ cột Risk hiện `—` và sort mất tác dụng
+> - **Automation:** `Yes` / `No` / `Partial` — chấm theo [Tiêu chí chấm cột Automation](references/automation_criteria.md) (**BẮT BUỘC đọc trước batch đầu tiên**): 3 trục kỹ thuật · sẵn sàng · đáng làm, lấy mức thấp nhất. **KHÔNG** gắn `Yes` mặc định — TC chạm OTP, email, CAPTCHA, biểu đồ, SSO… phải tra bảng. Ô chỉ ghi **đúng một từ**; điều kiện của `Partial`, lý do của `No` ghi vào mục `## Đối soát cột Automation` của index — viewer lọc cột này theo giá trị chính xác
 > - **Auto Type:** `UI` / `API` / `Unit` / `N/A` (Loại automation phù hợp)
-> - **Tags:** `@Smoke`, `@Regression`, `@CriticalPath`, `@Security`, `@Boundary`
+> - **Tags:** `@Smoke`, `@Regression`, `@CriticalPath`, `@Security`, `@Boundary` · tag có nghĩa với workflow khác: `@TechCheck` (cần DevTools — Quy Tắc Ngôn Ngữ Kiểm Chứng) · `@NeedsVerify` (chưa có evidence chống lưng) · `@PersonalOnly` · `@Deprecated` (hai tag dưới)
+> - **`@Deprecated`** — TC của chức năng đã gỡ. Bảng TC **không có cột trạng thái** (viewer không đọc cột lạ), nên trạng thái ghi bằng **hai dấu hiệu cùng lúc**: tag `@Deprecated` ở cột `Tags` **và** tiền tố `🗑️ Deprecated (<TICKET-ID>, <DD-MM-YYYY>) —` ở đầu ô `Test Scenario` / `Test Title`. Giữ nguyên dòng và TC ID. TC `@Deprecated`: **bị loại khỏi phạm vi** của `/execute-test-cases` (không tính vào tổng, không tính SKIPPED) · **không tính** vào Bảng Đối Soát Coverage, Bảng 4 vòng, Đối soát cột Automation, RTM · không chấm rubric khi review
+> - **`@PersonalOnly`** — QA **tự chạy và tự theo dõi** ngoài workflow (TC chạy quá lâu, cần thao tác tay đặc biệt…) → `/execute-test-cases` **bỏ qua**. Đây là tag **duy nhất** làm `/execute-test-cases` bỏ qua TC. Cột `Automation` (`Yes`/`Partial`/`No`) chỉ nói TC có làm automation hay không — TC `Automation = No` **vẫn** được `/execute-test-cases` chạy
 > - **Tag nền tảng** — BẮT BUỘC khi module có ≥ 2 nền tảng (requirements có cột `Nền tảng`, skill `skills-requirements-analyzer` mục 2.2): mỗi TC gắn `@Web` · `@Android` · `@iOS` · `@API` theo nền tảng nó chạy. REQ `Nền tảng` = `Tất cả` mà các bước thao tác khác nhau giữa nền tảng → **mỗi nền tảng một TC**, cùng `REQ ID`, mỗi TC nằm ở file nền tảng của nó. Dùng **tag**, **không** thêm cột `Nền tảng` — viewer map cột theo tên, cột lạ bị bỏ qua. TC nằm ở file của **đúng** nền tảng nó chạy (`web/` · `mobile/` · `api/` — mục 2 của Quy Tắc Xuất File); chung prefix nên **chung dải TC ID** toàn module — ❌ không mở dải TC ID riêng cho mobile/API
 >
-> ⚠️ **Tên cột là hợp đồng đọc, không phải nhãn trình bày.** `scripts/testcases-viewer` map cột theo **tên**, nên thứ tự cột đổi được nhưng tên thì không: `TC ID`, `REQ ID`, `Module`, `Priority`, `Automatable`, `Tags` phải khớp **chính xác** (thêm chữ như `TC ID liên quan` là mất cột), còn `Risk`, `Scenario`/`Test Title`, `Pre-Condition`, `Test Steps`, `Test Data`, `Expected`, `Auto Type` khớp theo chuỗi con. **KHÔNG dịch tên cột sang Tiếng Việt** — nội dung ô viết Tiếng Việt, tên cột giữ nguyên.
+> ⚠️ **Tên cột là hợp đồng đọc, không phải nhãn trình bày.** `scripts/testcases-viewer` map cột theo **tên**, nên thứ tự cột đổi được nhưng tên thì không: `TC ID`, `REQ ID`, `Module`, `Priority`, `Automation`, `Tags` phải khớp **chính xác** (thêm chữ như `TC ID liên quan` là mất cột), còn `Risk`, `Scenario`/`Test Title`, `Pre-Condition`, `Test Steps`, `Test Data`, `Expected`, `Auto Type` khớp theo chuỗi con. **KHÔNG dịch tên cột sang Tiếng Việt** — nội dung ô viết Tiếng Việt, tên cột giữ nguyên.
 >
 > **Ở độ hạt GỘP:** cột `Test Data` (Kiểu A) hoặc `Expected Result` (Kiểu B) chứa **Bảng biến thể / Bảng kiểm** — mỗi dòng một mã (`a`, `b`, `c`…), phân cách bằng `<br>`. Số cột của bảng **không đổi**, chỉ nội dung ô dày hơn. Xem mẫu ở mục Độ Hạt Test Case.
 
@@ -707,7 +730,7 @@ Bảng đối soát 4 vòng có **bốn** trạng thái, không phải ba:
 Mẫu dòng `⏭️` đạt yêu cầu:
 
 ```markdown
-| 4 | Compatibility | ⏭️ Cố ý bỏ | Trang tĩnh, rủi ro Thấp — chỉ kiểm Chrome. **Quyết định: QA lead, 2026-09-11.** Rà lại khi trang có thêm field nhập hoặc khi hệ thống cam kết hỗ trợ trình duyệt mới |
+| 4 | Compatibility | ⏭️ Cố ý bỏ | Trang tĩnh, rủi ro Thấp — chỉ kiểm Chrome. **Quyết định: QA lead, 11-09-2026.** Rà lại khi trang có thêm field nhập hoặc khi hệ thống cam kết hỗ trợ trình duyệt mới |
 ```
 
 ```markdown
@@ -745,7 +768,7 @@ Ngay dưới tiêu đề bộ TC, thêm một dòng để người đọc biết
 | 1 | Open form · Display | ✅ | TC_004–TC_006 |
 | 1 | Input valid · Save · Verify | ✅ | TC_007–TC_009 |
 | 2 | Required | ✅ | TC_010–TC_012 |
-| 2 | Validation | ✅ | TC_013–TC_028 (16 TC · 61 biến thể · đủ 9/9 mục bảng Password) |
+| 2 | Validation | ✅ | TC_013–TC_028 (16 TC · 61 biến thể · đủ 7/7 mục bảng Password) |
 | 2 | Error Guessing | 🔴 Thiếu | Chưa có TC bấm Lưu hai lần liên tiếp → **bổ sung trước khi xuất** |
 | 3 | Permission | ✅ | TC_040–TC_047 (3 role × 3 hành động) |
 | 3 | Database | ➖ | QA không có quyền truy cập DB — đội Dev xác minh |
@@ -909,9 +932,10 @@ Trước khi xuất kết quả cuối cùng cho user, Agent **BẮT BUỘC** t�
 - [ ] **2. 1-to-1 Step-Expected Matching:** Các bước `Test Steps` đánh số rõ ràng (1,2,3 — mỗi bước 1 hành động) và khớp 1-1 với `Expected Result` đánh số tương ứng.
 - [ ] **3. Concrete Test Data:** 100% test data chứa giá trị cụ thể, không còn từ ngữ mơ hồ ("hợp lệ", "dữ liệu đúng").
 - [ ] **4. Field Validation Coverage (đối soát theo BẢNG, không đếm theo số):** với **TỪNG** input field, mở đúng dòng loại field trong **Bảng Field-Level Validation Checklist (15 loại)** và đối soát **đủ từng mục** của dòng đó. Mục nào không áp dụng phải **ghi lý do một dòng**, không được im lặng bỏ qua.
-  > 🚨 `≥1 Positive + 2 Negative` là **sàn tối thiểu, KHÔNG phải mức đạt**. Trường Password có 9 mục trong bảng — sinh 3 TC rồi dừng là **trượt tiêu chí này**, dù về số lượng vẫn qua sàn. Đây chính là chỗ bộ TC bị nông mà vẫn xanh hết bảng.
+  > 🚨 `≥1 Positive + 2 Negative` là **sàn tối thiểu, KHÔNG phải mức đạt**. Trường Password có 7 mục trong bảng — sinh 3 TC rồi dừng là **trượt tiêu chí này**, dù về số lượng vẫn qua sàn. Đây chính là chỗ bộ TC bị nông mà vẫn xanh hết bảng.
   > Xuất kèm cột đối soát trong **Bảng Đối soát loại kiểm thử** dòng `V2 · Validation`: `đủ N/N mục bảng <loại field>`.
-- [ ] **5. Automation Metadata Ready:** 100% test cases được gắn đầy đủ `Automatable`, `Auto Type`, và `@Tag`.
+- [ ] **5. Automation Metadata Ready:** 100% test cases được gắn đầy đủ `Automation`, `Auto Type`, và `@Tag`. Cột `Automation` chấm theo [Tiêu chí chấm cột Automation](references/automation_criteria.md), **không** gắn `Yes` hàng loạt: TC chạm một tính năng ở bảng 3A mà vẫn `Yes` thì cách làm phải nằm trong bảng đó. Index có mục `## Đối soát cột Automation` — mọi TC `Partial` có điều kiện, mọi TC `No` có lý do, điều kiện đã gom thành danh sách cần chuẩn bị, TC vướng tạm thời ghi `⏸️ Hoãn` chứ không hạ cột.
+  > Với **DELTA**: chỉ chấm lại TC đã sửa / thêm, cập nhật đúng các dòng đó trong mục đối soát.
 - [ ] **6. Requirement Coverage (đối soát "đủ case"):** 100% REQ ID có **≥1 TC** trỏ về; REQ mức High Risk có đủ Positive + Negative + Boundary. Xuất **Bảng Đối Soát Coverage** kèm output:
 
 ```markdown
@@ -919,8 +943,38 @@ Trước khi xuất kết quả cuối cùng cho user, Agent **BẮT BUỘC** t�
 |---|---|---|---|---|
 | REQ-LOGIN-01 | Đăng nhập email | 5 | TC_001..TC_005 | ✅ |
 | REQ-LOGIN-02 | Khóa sau 5 lần sai | 0 | — | 🔴 THIẾU — phải bổ sung trước khi xuất |
+| REQ-LOGIN-27 · 40 | Gửi mail đặt lại · tự đăng nhập bằng cookie | 0 | — | ⚪ Ngoài phạm vi — `AMB-LOGIN-04` · `AMB-LOGIN-15` ⏭️, quyết định PO 18-08-2026 |
 ```
 > Nếu có REQ nào 0 TC → agent PHẢI quay lại sinh bổ sung, KHÔNG được xuất kết quả có dòng 🔴.
+>
+> **Ngoại lệ — requirements đã loại khỏi phạm vi viết TC:** REQ ghi *ngoài phạm vi viết TC / kiểm thử*, REQ 🔴 Deprecated, phần thuộc mục `Ngoài phạm vi` của requirements, hoặc AMB `⏭️` quyết định *"bỏ qua, không viết TC"* / *"chuyển sang module X"* → **không** sinh TC (kể cả TC "cho đủ bảng" hay biến thể lén phủ phần đó), **không** tính 🔴. Ghi dòng `⚪ Ngoài phạm vi` kèm **mã quyết định** ở Bảng Đối Soát Coverage, và dòng *Phạm vi REQ* ở đầu index liệt kê các mã bị loại. Nhánh 4 vòng chỉ vắng vì phần đã loại → `⏭️` dẫn mã quyết định. Đây là nguồn mà `/review-testcases` đọc để **không** báo lại các phần đó thành gap.
+
+  **6b. Phép thử chiều ngược — TC gánh nhiều REQ (BẮT BUỘC chạy, áp cả QUICK · FULL RBT · DELTA · `/generate-testcases-api`):**
+  Bảng trên chỉ trả lời *"REQ nào chưa có TC"* — nó **không** bắt được TC gánh quá nhiều REQ. Với **mỗi TC có ≥ 2 REQ ID**, đếm số TC **của cùng nền tảng** trỏ về từng REQ đó:
+
+  | Kết quả đếm trong một TC | Xử lý |
+  |---|---|
+  | Mọi REQ đều có TC khác chống lưng | ✅ Được giữ |
+  | Đúng **1** REQ chỉ có mỗi TC này, các REQ còn lại có TC khác | ✅ Được giữ — FAIL của TC vẫn quy được về REQ đó. Ghi chú ở cột Ghi chú của Bảng Đối Soát Coverage |
+  | **≥ 2** REQ chỉ có mỗi TC này | 🔴 **Vi phạm** bảng CẤM gộp (dòng *"Khác REQ ID mà mỗi REQ chỉ có đúng TC đó"*) → **tách**: TC gốc giữ 1 REQ, mỗi REQ còn lại một TC mới **cấp số nối tiếp dải** (không chèn giữa, không đánh lại) |
+
+  > ⚠️ **Hay vi phạm nhất ở TC API**: một request chứng minh được nhiều REQ cùng lúc (VD `POST /api/login` không gửi token → `200` vừa là *"đăng nhập thành công"* vừa là *"đăng nhập không cần token"*). Gộp nghe hợp lý, nhưng khi FAIL không biết REQ nào hỏng, và RTM báo mỗi REQ "đã phủ" dù không TC nào **chỉ** kiểm nó. Mỗi REQ phải có một TC mà **Expected cốt lõi** của nó là đúng REQ đó.
+  >
+  > **Số TC ít hơn số REQ không phải là lỗi** (1 TC gộp nhiều biến thể, 1 REQ có nhiều TC) — nhưng khi thấy tỉ lệ này, **bắt buộc** chạy phép thử 6b trước khi trả lời user.
+
+  Mẫu kiểm tự động (chạy trên file nền tảng / `parts/` của **từng** nền tảng):
+
+  ```python
+  import glob, re, collections
+  R = []
+  for f in glob.glob('docs/testcases/<module>/<nền-tảng>/**/*.md', recursive=True):
+      for line in open(f, encoding='utf-8'):
+          if line.startswith('| <HỆ_THỐNG>_<MODULE>_TC_'):
+              c = line.split(' | ')
+              R.append((c[0][2:], re.findall(r'REQ-[\w-]+?-(\d+)', c[1])))
+  cnt = collections.Counter(q for _, reqs in R for q in reqs)
+  print([tc for tc, reqs in R if sum(cnt[q] == 1 for q in reqs) >= 2] or 'không vi phạm')
+  ```
 
 - [ ] **7. Evidence-verified:** đã mở **100%** ảnh trong `docs/requirements/<module>/<nền-tảng>/evidence/`; mọi TC thuộc 4 nhóm bắt buộc (bố cục/thứ tự · nhãn nguyên văn · giá trị mặc định · định dạng hiển thị) đều truy được về một tấm ảnh cụ thể **hoặc một lần đọc DOM cụ thể**. TC không truy được → gắn `@NeedsVerify` và liệt kê ở mục "Vùng chưa có evidence". Xuất kèm **Bảng Đối Soát Evidence**:
 
@@ -972,11 +1026,12 @@ Quy trình bài bản, tuần tự cho module phức tạp. Bao gồm phân tíc
    - Mô tả hệ thống hiện tại
    - Mục tiêu kiểm thử MVP
    - Tài liệu yêu cầu (Requirements, User Stories, Figma link, PDF...)
-2. Đọc kỹ tài liệu và xác nhận đã hiểu bối cảnh
-3. Tóm tắt scope kiểm thử
-4. **Chờ user xác nhận** trước khi sang Bước 2
+2. **Kiểm module đã có bộ TC chưa** — có thì rẽ nhánh theo mục [Module đã có bộ TC — chế độ BỔ SUNG](#module-đã-có-bộ-tc--chế-độ-bổ-sung-áp-quick--full-rbt) và nêu rõ ở phần xác nhận bối cảnh
+3. Đọc kỹ tài liệu và xác nhận đã hiểu bối cảnh
+4. Tóm tắt scope kiểm thử
+5. **Chờ user xác nhận** trước khi sang Bước 2
 
-> ⚠️ **Bước 1 chưa xong nếu chưa mở evidence.** Trước khi tóm tắt scope, agent phải liệt kê `docs/requirements/<module>/<nền-tảng>/evidence/` và `Read` từng ảnh theo [Quy Tắc Đối Chiếu Evidence](#quy-tắc-đối-chiếu-evidence-bắt-buộc--áp-dụng-cả-3-modes-chạy-trước-batch-đầu-tiên). Kết quả đưa vào Output dưới dạng **Danh mục Evidence** (ảnh nào đủ / cắt cụt / thiếu).
+> ⚠️ **Bước 1 chưa xong nếu chưa mở evidence.** Trước khi tóm tắt scope, agent phải liệt kê `docs/requirements/<module>/<nền-tảng>/evidence/` và `Read` từng ảnh theo [Quy Tắc Đối Chiếu Evidence](#quy-tắc-đối-chiếu-evidence-bắt-buộc--áp-dụng-cả-4-modes-chạy-trước-batch-đầu-tiên). Kết quả đưa vào Output dưới dạng **Danh mục Evidence** (ảnh nào đủ / cắt cụt / thiếu).
 
 **Output:** Xác nhận hiểu bối cảnh + tóm tắt scope kiểm thử + **Danh mục Evidence đã mở**.
 
@@ -1033,10 +1088,11 @@ Quy trình bài bản, tuần tự cho module phức tạp. Bao gồm phân tíc
    - **V2 Functional:** hành vi giao diện · bắt buộc · validation · EP · BVA · quy tắc nghiệp vụ · bảng quyết định · chuyển trạng thái · phụ thuộc · kịch bản nghiệp vụ · CRUD · đoán lỗi
    - **V3 Technical:** phân quyền · bảo mật · API · CSDL · tích hợp · nhật ký
    - **V4 Non-functional:** tương thích · đáp ứng · bàn phím/trợ năng · hiệu năng · hồi quy · xuyên module
-   > Chấm sơ bộ mỗi nhánh `✅ sẽ sinh` / `➖ không áp dụng (ghi lý do + ai chịu)` **ngay ở bước này** — đây là lúc user review rẻ nhất, trước khi sinh TC chi tiết.
-4. **Chờ user review** danh sách scenarios trước khi sinh test case chi tiết
+   > Chấm sơ bộ mỗi nhánh `✅ sẽ sinh` / `➖ không áp dụng (lý do kỹ thuật)` / `⏭️ cố ý bỏ (lý do + ai quyết + điều kiện rà lại)` **ngay ở bước này** — đây là lúc user review rẻ nhất, trước khi sinh TC chi tiết.
+4. **Chấm mức rủi ro từng Module** theo bảng tiêu chí mục [Độ sâu theo rủi ro](#độ-sâu-theo-rủi-ro--không-phải-chức-năng-nào-cũng-chạy-đủ-4-vòng) — agent tự chấm, ghi căn cứ, KHÔNG hỏi user — rồi nêu **độ sâu tương ứng** (Đầy đủ / Tiêu chuẩn / Tối giản) kèm số TC ước tính. Chấm ở bước này để user phủ quyết ngay tại checkpoint, không phải sau khi đã sinh xong
+5. **Chờ user review** danh sách scenarios, bảng 4 vòng và mức rủi ro trước khi sinh test case chi tiết
 
-**Output:** Traceability Matrix + High-Level Test Scenarios.
+**Output:** Traceability Matrix + High-Level Test Scenarios + mức rủi ro · độ sâu từng Module.
 
 ---
 
@@ -1045,7 +1101,7 @@ Quy trình bài bản, tuần tự cho module phức tạp. Bao gồm phân tíc
 **Mục đích:** Sinh test cases chi tiết theo chiến lược Risk-Based Testing.
 
 **Agent phải:**
-1. Đánh giá Risk Level cho mỗi Module **theo bảng tiêu chí ở mục [Độ sâu theo rủi ro](#độ-sâu-theo-rủi-ro--không-phải-chức-năng-nào-cũng-chạy-đủ-4-vòng)** — agent tự chấm và ghi căn cứ, KHÔNG hỏi user:
+1. Áp **mức rủi ro đã được user duyệt ở Bước 4** (user sửa mức nào thì theo mức user sửa) — mức rủi ro quyết định độ sâu:
    - **Cao** → độ sâu **Đầy đủ**: đủ mọi nhánh của cả 4 vòng (40–60 TC)
    - **Trung bình** → độ sâu **Tiêu chuẩn**: V1 + V2 đủ, V3 giới hạn ở `Permission`/`Security`, V4 giới hạn ở `Responsive`/`Accessibility` (20–30 TC)
    - **Thấp** → độ sâu **Tối giản**: V1 đủ 6 nhánh (**không rút**), V2 chỉ nhánh có ràng buộc thật, V3/V4 phần lớn `⏭️` (8–12 TC)
@@ -1072,7 +1128,7 @@ Quy trình bài bản, tuần tự cho module phức tạp. Bao gồm phân tíc
    - **KHÔNG** gộp validation của **các trường khác nhau** vào 1 TC — biến thể **cùng một trường** thì gộp theo độ hạt đã chốt (xem mục Độ Hạt Test Case)
 6. **Bao phủ Component-Level Checklist:** Data Table/List, CRUD Lifecycle, Permission/Role (đối chiếu Ma trận Phân quyền), Modal/Dialog, Notification, Status Flow (đối chiếu Ma trận Trạng thái)
 7. **Tích hợp Scenarios Chuyên Sâu & Non-Functional:** Race Condition/Double Submit, Session/Network Resilience, Localization/UTF-8/Emoji, Keyboard Accessibility (A11y), HTTP Status Codes.
-8. Nếu scenarios quá nhiều → sinh từng Module một, hỏi user để tiếp tục
+8. Nếu scenarios quá nhiều → chia batch theo **Module → Vòng**, sinh lần lượt từng Module nhưng **chạy thẳng hết** theo Quy Tắc Xuất File mục 3 — KHÔNG dừng hỏi giữa các batch. Checkpoint của FULL RBT chỉ nằm ở Bước 2 và Bước 4
 
 **Output:** Danh sách Test Cases chi tiết có Risk Level.
 
@@ -1086,16 +1142,16 @@ Quy trình bài bản, tuần tự cho module phức tạp. Bao gồm phân tíc
 1. Chuẩn hóa toàn bộ test cases vào bảng Markdown:
 
 ```markdown
-| TC ID | REQ ID | Module | Risk Level | Test Title | Pre-Condition | Test Steps | Expected Result | Priority | Test Data | Automatable | Auto Type | Tags |
+| TC ID | REQ ID | Module | Risk Level | Test Title | Pre-Condition | Test Steps | Expected Result | Priority | Test Data | Automation | Auto Type | Tags |
 ```
 
 2. Quy tắc bảng:
    - TC ID theo format thống nhất (ví dụ: `CRM_CUST_TC_001`)
    - **REQ ID bắt buộc mỗi dòng** — TC không trỏ về REQ nào là TC mồ côi, phải xem lại
    - Test Steps đánh số `1. 2. 3.` (mỗi bước 1 hành động), Expected Result đánh số khớp 1-1, dùng `<br>` xuống dòng trong cell
-   - Gắn đầy đủ metadata `Automatable` (`Yes`/`No`/`Partial`), `Auto Type` (`UI`/`API`/`Unit`/`N/A`), và `@Tags` (`@Smoke`, `@Regression`, `@CriticalPath`...)
+   - Gắn đầy đủ metadata `Automation` (`Yes`/`No`/`Partial` — chấm theo [Tiêu chí chấm cột Automation](references/automation_criteria.md)), `Auto Type` (`UI`/`API`/`Unit`/`N/A`), và `@Tags` (`@Smoke`, `@Regression`, `@CriticalPath`...)
    - **TUYỆT ĐỐI không được bỏ sót** bất kỳ test case nào đã sinh ở Bước 5
-3. **Chạy Self-Quality Gate (11 Tiêu chí, 0–10):** Kiểm định lại — bao gồm **Bảng Đối Soát Coverage** (tiêu chí 6: mọi REQ có ≥1 TC), **Bảng Đối Soát Evidence** (tiêu chí 7), **rà ngôn ngữ kiểm chứng** (tiêu chí 8), **Bảng rà soát đặc tính chất lượng ISO/IEC 25010:2023** (tiêu chí 9: đủ 9/9 đặc tính, ô `➖` ghi rõ ai chịu) và **Bảng Đối soát loại kiểm thử 4 vòng** (tiêu chí 10: mọi nhánh được chấm, 3 nhánh cấm `➖`, độ hạt GỘP ghi kèm số biến thể) — trước khi xuất Artifact (`test_cases_<module>.md`).
+3. **Chạy Self-Quality Gate (11 Tiêu chí, 0–10):** Kiểm định lại — bao gồm **Bảng Đối Soát Coverage** (tiêu chí 6: mọi REQ có ≥1 TC), **Bảng Đối Soát Evidence** (tiêu chí 7), **rà ngôn ngữ kiểm chứng** (tiêu chí 8), **Bảng rà soát đặc tính chất lượng ISO/IEC 25010:2023** (tiêu chí 9: đủ 9/9 đặc tính, ô `➖` ghi rõ ai chịu) và **Bảng Đối soát loại kiểm thử 4 vòng** (tiêu chí 10: mọi nhánh được chấm, 3 nhánh cấm `➖`, độ hạt GỘP ghi kèm số biến thể) — trước khi xuất Artifact (`TEST_CASES_<TÊN_MODULE>_SUMMARY.md`).
 
 **Output:** Bảng Test Cases Markdown hoàn chỉnh kèm Metadata Automation.
 
@@ -1116,7 +1172,7 @@ Agent xác định nguồn trước khi sinh:
 | Nguồn | Khi nào | Cách làm |
 |---|---|---|
 | **REQ-based** | Chưa có bộ TC, chỉ có requirements / UI | Rút mục checklist trực tiếp từ requirements + 3 bảng checklist chuẩn của skill |
-| **TC-based** | Đã có file `test_cases_<module>.md` | **Rút gọn** từ bộ TC sẵn có — gom nhóm TC cùng chủ đề thành 1 mục, giữ cột `TC ID liên quan` để truy ngược |
+| **TC-based** | Đã có file `TEST_CASES_<TÊN_MODULE>_SUMMARY.md` | **Rút gọn** từ bộ TC sẵn có — gom nhóm TC cùng chủ đề thành 1 mục, giữ cột `TC ID liên quan` để truy ngược |
 
 > TC-based được ưu tiên khi bộ TC đã tồn tại — tránh sinh lại nội dung lệch với bộ TC gốc.
 
@@ -1150,7 +1206,7 @@ Checklist **không** chấm bảng đối soát 4 vòng (Gate #10 không áp d�
 
 **Agent phải:**
 
-0. **Mở evidence** theo [Quy Tắc Đối Chiếu Evidence](#quy-tắc-đối-chiếu-evidence-bắt-buộc--áp-dụng-cả-3-modes-chạy-trước-batch-đầu-tiên) — checklist nêu **nhãn nút và dấu hiệu quan sát được trên UI**, sai một chữ là người chạy tick nhầm. Nguồn TC-based thì evidence đã được đối chiếu ở bước sinh TC, chỉ cần mở lại ảnh của màn hình có trong checklist
+0. **Mở evidence** theo [Quy Tắc Đối Chiếu Evidence](#quy-tắc-đối-chiếu-evidence-bắt-buộc--áp-dụng-cả-4-modes-chạy-trước-batch-đầu-tiên) — checklist nêu **nhãn nút và dấu hiệu quan sát được trên UI**, sai một chữ là người chạy tick nhầm. Nguồn TC-based thì evidence đã được đối chiếu ở bước sinh TC, chỉ cần mở lại ảnh của màn hình có trong checklist
 1. **Xác định loại checklist** (Smoke / Post-hotfix / Regression / Release-readiness) và **nguồn input** (REQ-based hay TC-based)
 2. **Xác định scope:** module nào, luồng nào, role nào. Với Post-hotfix → xác định rõ **vùng ảnh hưởng** của thay đổi + vùng lân cận có rủi ro
 3. **Rút mục từ 3 bảng checklist chuẩn của skill** — chỉ lấy mục **thực sự áp dụng** cho module:
@@ -1222,7 +1278,7 @@ Trước khi xuất, agent **BẮT BUỘC** tự rà:
 
 Đồng bộ bộ TC **đã tồn tại** với requirements vừa đổi theo ticket. Chỉ chạm phần bị ảnh hưởng, giữ nguyên mọi thứ còn lại.
 
-Command: `/update-testcases-from-impact` — quy trình 7 bước chi tiết nằm trong command đó. Mục này là **bộ quy tắc bất biến** mà mọi lần chạy DELTA phải tuân thủ.
+Command: `/update-testcases-from-impact` — quy trình 7 bước chi tiết nằm trong command đó (Quality Gate chạy ở bước cuối, sau khi đã ghi Nhật ký và Delta TC List). Mục này là **bộ quy tắc bất biến** mà mọi lần chạy DELTA phải tuân thủ.
 
 ## Nguyên tắc gốc: TC ID là khoá, không phải nhãn
 
@@ -1235,9 +1291,9 @@ Vì vậy Mode DELTA đặt việc **bảo toàn TC ID** lên trên mọi mục 
 | # | Quy tắc | Vì sao |
 |---|---|---|
 | 1 | **Sửa tại chỗ** trong file nền tảng `<nền-tảng>/test_cases_<module>_<nền-tảng>.md` / `<nền-tảng>/parts/part_NN_*.md` — tên file không đổi | Mọi workflow sau (`/execute-test-cases`, `/update-automation-from-impact`, `/generate-traceability-matrix`) đọc theo mẫu đường dẫn cố định |
-| 2 | **Sao lưu trước khi sửa** vào `archive/test_cases_<module>_<nền-tảng>_v<N>.md` | Sửa tại chỗ không có bản đối chiếu thì không ai kiểm được agent đã đổi gì |
+| 2 | **Ghi mốc git trước khi sửa** — hash commit gần nhất của file (`git log -1 --format=%h -- <file>`). File đang có thay đổi chưa commit (`git status --short <file>` có dòng) → **dừng**, đề nghị user commit trước; agent không tự commit | Sửa tại chỗ không có bản đối chiếu thì không ai kiểm được agent đã đổi gì. Có mốc thì xem lại bản cũ bằng `git show <hash>:<file>`, so bằng `git diff <hash> -- <file>` |
 | 3 | **Giữ nguyên TC ID.** TC mới cấp số tiếp dải hiện có, KHÔNG chèn vào giữa | Xem nguyên tắc gốc ở trên |
-| 4 | **KHÔNG xoá dòng TC.** Chức năng gỡ → `🗑️ Deprecated (TICKET-XXX)` | Đối xứng quy tắc "KHÔNG xoá dòng REQ". Xoá dòng là mất dấu vết TC từng tồn tại, và script tương ứng thành orphan |
+| 4 | **KHÔNG xoá dòng TC.** Chức năng gỡ → gắn tag `@Deprecated` ở cột `Tags` **và** tiền tố `🗑️ Deprecated (TICKET-XXX, <DD-MM-YYYY>) —` ở đầu ô `Test Scenario` (quy ước ở phần giải thích cột Tags) | Đối xứng quy tắc "KHÔNG xoá dòng REQ". Xoá dòng là mất dấu vết TC từng tồn tại, và script tương ứng thành orphan |
 | 5 | **Đọc REQ đã đổi, không suy từ tên TC** | Tên TC không chứa kỳ vọng. Sửa theo suy đoán tạo ra TC nghe hợp lý nhưng sai kỳ vọng mới — loại lỗi khó phát hiện nhất |
 
 ## Bảng ánh xạ: REQ đổi gì → TC sửa gì
@@ -1256,7 +1312,7 @@ Vì vậy Mode DELTA đặt việc **bảo toàn TC ID** lên trên mọi mục 
 | Đổi quy tắc nghiệp vụ / trạng thái | **V2 · Business Rule · State Transition** | Sửa bảng quyết định / bảng transition, cả ô hợp lệ lẫn ô bị chặn |
 | Đổi phân quyền | **V3 · Permission** | Sửa TC phân quyền + kiểm ma trận role |
 | Đổi breakpoint / trình duyệt cam kết | **V4 · Responsive · Compatibility** | Sửa danh sách kích thước/trình duyệt trong TC |
-| REQ 🔴 bị gỡ | Nhánh của TC đó | TC → `🗑️ Deprecated`, giữ dòng |
+| REQ 🔴 bị gỡ | Nhánh của TC đó | TC → tag `@Deprecated` + tiền tố `🗑️ Deprecated (TICKET-XXX, <ngày>) —` ở `Test Scenario`, giữ dòng |
 | REQ 🟢 mới | — | ❌ Ngoài phạm vi DELTA → QUICK / FULL RBT |
 
 > 🚨 **Bốn dòng V1 đầu bảng bắt buộc mở evidence trước khi sửa** — đúng **4 nhóm TC không được suy diễn** của [Quy Tắc Đối Chiếu Evidence](#quy-tắc-đối-chiếu-evidence-bắt-buộc--áp-dụng-cả-4-modes-chạy-trước-batch-đầu-tiên). Chưa có ảnh mới của màn hình sau khi đổi thì **không sửa**, gắn `@NeedsVerify` và báo user recon bổ sung.
@@ -1273,15 +1329,16 @@ Vì vậy Mode DELTA đặt việc **bảo toàn TC ID** lên trên mọi mục 
 4. Thêm field mới → **bảng 15 loại field** của loại đó đã đối soát đủ từng mục chưa, hay mới sinh 2–3 TC cho xong?
 5. Thêm TC mới có làm file **vượt ngưỡng 40 TC** → phải tách `parts/`?
 
-## Quality Gate DELTA (7 tiêu chí)
+## Quality Gate DELTA (8 tiêu chí)
 
 - [ ] **1.** Mọi TC ID giữ nguyên — không TC nào bị đổi số hay đánh lại từ `001`
-- [ ] **2.** Tên file index không đổi — không có `_improved` / `_v2` ngoài `archive/`
-- [ ] **3.** Không dòng TC nào bị xoá — TC gỡ đều ở trạng thái 🗑️ Deprecated kèm mã ticket
-- [ ] **4.** Bảng Đối Soát Coverage khớp lại — mọi REQ 🟡/🟢 active có ≥1 TC active
+- [ ] **2.** Tên file index không đổi — không có file `_improved` / `_v2` / thư mục `archive/` nào
+- [ ] **3.** Không dòng TC nào bị xoá — TC gỡ đều mang **cả** tag `@Deprecated` **và** tiền tố `🗑️ Deprecated (<mã ticket>, <ngày>) —` ở `Test Scenario`
+- [ ] **4.** Bảng Đối Soát Coverage khớp lại — mọi REQ 🟡 (đã sửa) và REQ chưa đổi còn active có ≥1 TC **không** `@Deprecated`. REQ 🔴 không còn TC active là **đúng**, ghi lý do. REQ 🟢 (mới) **không** chấm ở gate này — liệt kê ở *Ngoài phạm vi* kèm command sinh bổ sung
 - [ ] **5.** **Bảng Đối soát loại kiểm thử (4 vòng)** cập nhật **đúng những nhánh ticket chạm tới**, giữ nguyên phần còn lại — KHÔNG rà lại cả module. Ticket đụng thành phần màn hình mà nhánh `V1 · UI cơ bản` không đổi gì = **dấu hiệu đã bỏ sót**
-- [ ] **6.** Số TC ở index khớp tổng các `parts/`
-- [ ] **7.** Có **Nhật ký thay đổi** ở cuối file TC + **Delta TC List** (có cột **Vòng · Nhánh**) xuất ra chat cho automation dùng tiếp
+- [ ] **6.** Số TC ở index (Bản đồ tài liệu) khớp tổng số TC của các file nền tảng / `parts/`, tách rõ số TC `@Deprecated`
+- [ ] **7.** `docs/testcases/README.md` (danh mục) đã cập nhật: số TC, REQ bao phủ, ngày cập nhật
+- [ ] **8.** Có **Nhật ký thay đổi** ở cuối file TC + **Delta TC List ghi ra file** `impact/delta_tc_<TICKET-ID>.md` (cùng hậu tố với Impact Report) — có cột **Nền tảng** và **Vòng · Nhánh**, có đủ dòng `⏸️ @NeedsVerify` của TC chưa sửa được, ghi đúng **mốc git** của từng file nền tảng trước khi sửa
 
 ---
 
@@ -1333,17 +1390,22 @@ Vì vậy Mode DELTA đặt việc **bảo toàn TC ID** lên trên mọi mục 
 - ❌ **Chạy QUICK/FULL RBT trên module đã có file TC** — sinh bộ thứ hai, TC ID đánh lại từ `001`, vỡ truy vết sang automation. Đã có TC thì dùng Mode DELTA
 - ❌ DELTA sinh lại cả file/module TC thay vì sửa đúng dòng bị ảnh hưởng
 - ❌ DELTA đổi TC ID, đánh lại số, hoặc chèn số mới vào giữa dải đang dùng
-- ❌ DELTA xoá dòng TC của chức năng bị gỡ (phải đổi trạng thái 🗑️ Deprecated kèm mã ticket)
-- ❌ DELTA sinh file `_improved` / `_v2` / `_new` ngoài `archive/` — index có tên bất biến
-- ❌ DELTA sửa tại chỗ mà **không sao lưu** bản cũ vào `archive/` trước
+- ❌ DELTA xoá dòng TC của chức năng bị gỡ (phải gắn tag `@Deprecated` + tiền tố `🗑️ Deprecated (<mã ticket>, <ngày>) —` ở `Test Scenario`)
+- ❌ Đánh dấu Deprecated **chỉ bằng chữ** mà không gắn tag `@Deprecated` — `/execute-test-cases`, RTM và Bảng Đối Soát Coverage lọc theo tag, thiếu tag thì TC của chức năng đã gỡ vẫn bị đem ra chạy và vẫn được đếm là đang phủ REQ
+- ❌ DELTA sinh file `_improved` / `_v2` / `_new` hoặc thư mục `archive/` — index có tên bất biến, bản cũ nằm trong git
+- ❌ DELTA sửa tại chỗ mà **không ghi mốc git**, hoặc sửa đè lên thay đổi chưa commit
 - ❌ DELTA sửa TC theo suy đoán từ tên TC, không đọc nội dung REQ sau khi đổi
 - ❌ DELTA tự viết TC cho REQ mới (🟢) — ngoài phạm vi, phải route sang QUICK / FULL RBT
 - ❌ DELTA bỏ qua tác động lan toả (TC dùng field ở bước phụ · TC lấy TC vừa Deprecated làm precondition)
-- ❌ DELTA xong mà không ghi **Nhật ký thay đổi** và không xuất **Delta TC List** — tầng automation mất input
+- ❌ DELTA xong mà không ghi **Nhật ký thay đổi** và không ghi **Delta TC List** — tầng automation mất input
+- ❌ **Delta TC List chỉ nằm trong chat** — tầng automation thường chạy ở phiên khác, đóng phiên là mất. Phải ghi file `impact/delta_tc_<TICKET-ID>.md`
+- ❌ **Delta TC List thiếu cột Nền tảng** — dải TC ID chung toàn module nên nhìn mã không biết TC thuộc web, app hay API; automation không biết sửa ở project nào, chạy lại trên Android hay iOS
+- ❌ **Bỏ TC `@NeedsVerify` khỏi Delta TC List** — automation tưởng TC không bị ảnh hưởng. Ghi dòng `⏸️ chưa sửa` để automation biết mà không chạm
+- ❌ **Ghi Delta TC List ở Mode PLAN** — kế hoạch chưa duyệt có thể bị gạch bớt; automation chỉ được đọc thứ đã thật sự sửa
 - ❌ **Bộ TC không có nhánh `UI cơ bản`** — không TC nào kiểm nhãn nguyên văn, thứ tự field, trạng thái mặc định của màn hình. Validation đầy đủ đến đâu cũng vẫn là thiếu hẳn một lớp
 - ❌ **Nhảy cóc vòng** — sinh validation (V2) trước khi có TC mở form và lưu được (V1). V1 fail thì mọi TC V2 đều BLOCKED, chạy hết mới biết là quá muộn
 - ❌ **Trộn TC của hai vòng vào một batch** — mất ranh giới chia việc và không chấm được bảng đối soát
-- ❌ **Đọc lướt bảng 15 loại field rồi sinh 2–3 TC cho xong** — Password có 9 mục, Email có 9 mục; sinh 3 TC là trượt Gate #4 dù vẫn qua sàn `1 positive + 2 negative`
+- ❌ **Đọc lướt bảng 15 loại field rồi sinh 2–3 TC cho xong** — Password có 7 mục, Email có 9 mục; sinh 3 TC là trượt Gate #4 dù vẫn qua sàn `1 positive + 2 negative`
 - ❌ **Chấm `➖` cho `UI cơ bản` / `Validation` / `Permission`** — ba nhánh này không bao giờ ngoài phạm vi khi điều kiện kích hoạt đã thoả
 - ❌ **Ghi `➖` trơn không lý do, không tên người/đội chịu trách nhiệm** — biến "đã thống nhất không test" thành "QA quên test", đúng thứ bảng này sinh ra để chống
 - ❌ **Hỏi lại user về quyền API / CSDL / nhật ký ở từng module** — đó là thuộc tính cấp dự án, đọc dòng `Năng lực kiểm thử của QA` ở `docs/requirements/README.md`; chưa có thì hỏi **một lần** rồi ghi vào đó ngay
@@ -1370,8 +1432,9 @@ Vì vậy Mode DELTA đặt việc **bảo toàn TC ID** lên trên mọi mục 
 | Bảng Đối Soát Coverage | Mỗi REQ ID × số TC × đủ Positive/Negative/Boundary (tiêu chí 6) |
 | **Bảng Đối Soát Evidence** | Mỗi ảnh × màn hình/trạng thái × TC dựa vào × đầy đủ hay cắt cụt (tiêu chí 7) |
 | **Vùng chưa có evidence** | Danh sách màn hình/trạng thái không có ảnh chống lưng + TC bị gắn `@NeedsVerify` |
-| **Bảng Đối soát loại kiểm thử (4 vòng)** | Mọi nhánh của V1–V4 × ✅/➖/🔴 × TC ID (kèm số biến thể nếu GỘP) hoặc lý do + ai chịu (tiêu chí 10) |
+| **Bảng Đối soát loại kiểm thử (4 vòng)** | Mọi nhánh của V1–V4 × ✅/➖/⏭️/🔴 × TC ID (kèm số biến thể nếu GỘP) hoặc lý do (➖) · lý do + ai quyết + điều kiện rà lại (⏭️) (tiêu chí 10) |
 | **Bảng rà soát đặc tính chất lượng** | 9 đặc tính ISO/IEC 25010:2023 × ✅/➖/🔴 × TC ID hoặc lý do (tiêu chí 9) |
+| **Đối soát cột Automation** | Đếm Yes/Partial/No/⏸️ Hoãn theo nền tảng + điều kiện cần chuẩn bị + TC Partial/No/Hoãn kèm lý do (tiêu chí 5) |
 
 ### Mode FULL RBT
 
@@ -1380,9 +1443,9 @@ Vì vậy Mode DELTA đặt việc **bảo toàn TC ID** lên trên mọi mục 
 | 1 | Xác nhận bối cảnh + **Danh mục Evidence đã mở** |
 | 2 | Luồng + Ambiguities + Câu hỏi Q&A (gồm xung đột tài liệu ↔ evidence) |
 | 3 | Module Decomposition + Dependencies |
-| 4 | Traceability Matrix + High-Level Scenarios **xếp theo 4 vòng** (mỗi nhánh chấm sơ bộ ✅/➖) |
+| 4 | Traceability Matrix + High-Level Scenarios **xếp theo 4 vòng** (mỗi nhánh chấm sơ bộ ✅/➖/⏭️) + **mức rủi ro · độ sâu** từng Module |
 | 5 | Test Cases chi tiết (REQ ID + Risk Level + Test Data), sinh **tuần tự V1 → V4** |
-| 6 | Bảng Markdown chuẩn (Jira/Excel ready) + Bảng Đối Soát Coverage + **Bảng Đối Soát Evidence** + **Bảng Đối soát loại kiểm thử (4 vòng)** + **Bảng rà soát đặc tính chất lượng (ISO/IEC 25010:2023)** |
+| 6 | Bảng Markdown chuẩn (Jira/Excel ready) + Bảng Đối Soát Coverage + **Bảng Đối Soát Evidence** + **Bảng Đối soát loại kiểm thử (4 vòng)** + **Bảng rà soát đặc tính chất lượng (ISO/IEC 25010:2023)** + **Đối soát cột Automation** |
 
 ### Mode CHECKLIST
 
@@ -1393,7 +1456,15 @@ Vì vậy Mode DELTA đặt việc **bảo toàn TC ID** lên trên mọi mục 
 | Ghi chú "Không áp dụng" | Component có trong bảng chuẩn nhưng module không có → nêu rõ, không bỏ im lặng |
 | Bảng ký nhận | Môi trường · Build/Version · Người thực hiện · Ngày · Kết quả |
 
-> File output khuyến nghị: `docs/checklists/checklist_<loại>_<module>.md`
+> **Nơi ghi file — nhánh `docs/checklists/`, có tầng nền tảng như `testcases/`:**
+>
+> | Loại | Đường dẫn |
+> |---|---|
+> | Smoke · Regression (module) | `docs/checklists/<module>/<nền-tảng>/checklist_<loại>_<YYYYMMDD>.md` |
+> | Post-hotfix | `docs/checklists/<module>/<nền-tảng>/checklist_post-hotfix_<TICKET-ID>.md` — gắn với bản vá, hai hotfix cùng ngày không đè nhau |
+> | Release-readiness (cắt ngang nhiều module) | `docs/checklists/_release/checklist_release_<mốc>.md` — `<mốc>` cùng slug với `docs/test-plans/test_plan_<mốc>.md` |
+>
+> `<loại>` viết thường: `smoke` · `regression` · `post-hotfix` · `release`. Checklist là **ảnh chụp tại một thời điểm**, không sửa tại chỗ như bộ TC: lần rà mới sinh file mới theo ngày/ticket/mốc. Cùng ngày chạy lại đúng loại đó → ghi đè file của ngày đó (chưa ai tick). Nguồn TC-based **bỏ qua TC `@Deprecated`**.
 >
 > 📄 **Checklist là tài liệu đọc/in trực tiếp, KHÔNG nạp vào `scripts/testcases-viewer`.** Viewer đó chỉ đọc bảng test case chi tiết (`test_cases_*.md`); checklist cố tình không có `Test Steps` / `Test Data` / `Risk Level` nên nạp vào chỉ ra bảng rỗng. Vì vậy header checklist **được phép** đặt Tiếng Việt cho người tick tay (`Hạng mục kiểm tra`, `Kết quả kỳ vọng`, `TC ID liên quan`) — nó không chịu hợp đồng đọc của viewer như bảng TC.
 
@@ -1403,10 +1474,11 @@ Vì vậy Mode DELTA đặt việc **bảo toàn TC ID** lên trên mọi mục 
 |--------|--------|
 | `impact/impact_plan_<TICKET-ID>.md` | Bảng ánh xạ REQ → TC (✅ chắc chắn / ⚠️ suy luận / ❓ chưa có TC) + kế hoạch sửa từng TC + tác động lan toả |
 | File nền tảng đã sửa (+ index cập nhật) | Sửa **tại chỗ**, tên file không đổi, TC ID giữ nguyên |
-| `archive/test_cases_<module>_<nền-tảng>_v<N>.md` | Bản trước khi sửa — để đối chiếu |
+| Mốc git trước khi sửa | Hash commit của từng file nền tảng — ghi ở Nhật ký và `delta_tc_` để đối chiếu |
 | **Bảng Đối soát loại kiểm thử (4 vòng)** | Cập nhật **chỉ nhánh ticket chạm tới** ở cuối index — phần còn lại giữ nguyên |
-| Nhật ký thay đổi | Bảng ở cuối file TC: ngày · ticket · TC bị ảnh hưởng · **vòng · nhánh** · thay đổi · bản sao lưu |
-| **Delta TC List** | Hiển thị trong chat, có cột **Vòng · Nhánh** — input trực tiếp cho `/update-automation-from-impact` |
+| **Đối soát cột Automation** | Chấm lại cột `Automation` của TC đã sửa / thêm, cập nhật đúng các dòng đó trong mục đối soát của index |
+| Nhật ký thay đổi | Bảng ở cuối file TC: ngày · ticket · TC bị ảnh hưởng · **vòng · nhánh** · thay đổi · mốc git |
+| **`impact/delta_tc_<TICKET-ID>.md`** | Delta TC List — **chỉ ghi ở APPLY**, cột **Nền tảng** + **Vòng · Nhánh** + hành động `✏️` / `➕` / `🗑️` / `⏸️`, ghi mốc git từng nền tảng. Input **bắt buộc** của `/update-automation-from-impact`; chat chỉ hiện tóm tắt + đường dẫn. Mẫu đầy đủ ở command `/update-testcases-from-impact` Bước 6 |
 | Danh sách ngoài phạm vi | REQ 🟢 chưa có TC + command tiếp theo |
 
 Tất cả output phải bằng **Tiếng Việt**, format **Markdown**, và tuân thủ **Quy Tắc Xuất File & Theo Dõi Tiến Độ**: ghi thẳng vào file (`docs/testcases/` hoặc `docs/checklists/`), chat chỉ hiện tiến độ + Bảng Đối Soát Coverage + tóm tắt đường dẫn file.

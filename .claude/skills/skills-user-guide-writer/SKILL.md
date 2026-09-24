@@ -37,7 +37,7 @@ Purpose: Biến thứ QA đã biết rất rõ về hệ thống (requirements, 
 | Có nói về lỗi không | Có — mọi ràng buộc validation | Có — mọi case âm | Chỉ lỗi người dùng **hay gặp** và **cách tự xử lý** |
 | Giọng văn | Mô tả (*"Hệ thống hiển thị…"*) | Mô tả + kỳ vọng | **Mệnh lệnh** (*"Nhấn **Lưu**."*) |
 
-> 🚫 **Lỗi số một:** chép `requirements_<module>.md` rồi đổi giọng. Ra một tài liệu tổ chức theo màn hình, liệt kê đủ mọi ràng buộc validation — đúng về nội dung nhưng người dùng không dùng được, vì họ mở tài liệu ra với **một việc cần làm**, không phải với một màn hình cần hiểu.
+> 🚫 **Lỗi số một:** chép `REQUIREMENTS_<TÊN_MODULE>_SUMMARY.md` rồi đổi giọng. Ra một tài liệu tổ chức theo màn hình, liệt kê đủ mọi ràng buộc validation — đúng về nội dung nhưng người dùng không dùng được, vì họ mở tài liệu ra với **một việc cần làm**, không phải với một màn hình cần hiểu.
 
 ---
 
@@ -64,7 +64,7 @@ Hướng dẫn sử dụng sai **nguy hiểm hơn** requirements sai: người d
 | Nguồn | Ghi chú |
 |---|---|
 | Một tấm ảnh trong `docs/requirements/<module>/<nền-tảng>/evidence/` | Mở ảnh ra xem thật, không đọc tên file rồi đoán |
-| Một dòng REQ trong `requirements_<module>.md` | Dẫn được REQ ID |
+| Một dòng REQ trong `REQUIREMENTS_<TÊN_MODULE>_SUMMARY.md` | Dẫn được REQ ID |
 | Một lần thao tác thật qua Playwright MCP trong phiên này | Mode FULL |
 
 Không truy được về nguồn nào → **không viết bước đó**. Gắn `⚠️ Chưa xác minh` và liệt kê ở mục *Vùng chưa xác minh* cuối tài liệu.
@@ -179,7 +179,7 @@ Một khái niệm — **một** từ, xuyên suốt tài liệu. Chọn từ **
 | Phiên bản tài liệu | v1.0 |
 | Áp dụng cho phiên bản phần mềm | v2.4 |
 | Đối tượng đọc | Nhân viên kinh doanh (role: Sales) |
-| Ngày cập nhật | 2026-09-09 |
+| Ngày cập nhật | 09-09-2026 |
 | Cấu trúc tài liệu | Biên soạn theo cấu trúc ISO/IEC/IEEE 26514 |
 
 ## 1. Trước khi bắt đầu
@@ -254,7 +254,7 @@ Trước khi xuất, tự rà đủ 10 tiêu chí:
 
 | ❌ Sai | ✅ Đúng |
 |---|---|
-| Chép `requirements_<module>.md` rồi đổi giọng | Viết lại theo việc người dùng cần làm |
+| Chép `REQUIREMENTS_<TÊN_MODULE>_SUMMARY.md` rồi đổi giọng | Viết lại theo việc người dùng cần làm |
 | Tổ chức theo màn hình: *"Màn hình danh sách khách hàng gồm các thành phần…"* | Tổ chức theo việc: *"Thêm một khách hàng mới"* |
 | Liệt kê **mọi** ràng buộc validation của mọi trường | Chỉ nêu trường bắt buộc + lỗi người dùng hay gặp |
 | Viết hướng dẫn cho tính năng chưa nhìn thấy bao giờ | Ghi vào *Vùng chưa xác minh* |
