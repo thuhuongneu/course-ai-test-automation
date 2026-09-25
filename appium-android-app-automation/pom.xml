@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>com.anhtester.book</groupId>
+  <artifactId>appium-android-app-automation</artifactId>
+  <version>1.0.0</version>
+  <packaging>jar</packaging>
+
+  <properties>
+    <maven.compiler.release>11</maven.compiler.release>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+    <appium.client.version>9.3.0</appium.client.version>
+    <testng.version>7.10.2</testng.version>
+    <allure.version>2.35.5</allure.version>
+    <aspectj.version>1.9.20.1</aspectj.version>
+    <log4j.version>2.24.3</log4j.version>
+    <dotenv.version>3.0.2</dotenv.version>
+
+    <!-- Một chỗ duy nhất khai version Allure CLI — dùng chung cho maven-dependency-plugin và allure-maven -->
+    <allure.cli.version>2.46.1</allure.cli.version>
+    <allure.home>${project.basedir}/.allure</allure.home>
+    <reports.dir>${project.basedir}/reports</reports.dir>
+  </properties>
+
+  <!--
+    java-client 9.3.0 khai Selenium theo khoảng [4.19.0, 5.0) → Maven lấy bản 4.x MỚI NHẤT, mà bản đó
+    đã bỏ ContextAware / html5.LocationContext java-client cần → lỗi compile. Ghim cả bộ Selenium qua BOM.
+  -->
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.seleniumhq.selenium</groupId>
+        <artifactId>selenium-bom</artifactId>
+        <version>4.25.0</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+  <dependencies>
+    <dependency>
+      <groupId>io.appium</groupId>
+      <artifactId>java-client</artifactId>
+      <version>${appium.client.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.testng</groupId>
+      <artifactId>testng</artifactId>
+      <version>${testng.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>io.qameta.allure</groupId>
+      <artifactId>allure-testng</artifactId>
+      <version>${allure.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>io.github.cdimascio</groupId>
+      <artifactId>dotenv-java</artifactId>
+      <version>${dotenv.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-core</artifactId>
+      <version>${log4j.version}</version>
+    </dependency>
+    <!-- Appium java-client ghi log qua SLF4J → chuyển sang Log4j2 để gom chung một file log -->
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-slf4j2-impl</artifactId>
+      <version>${log4j.version}</version>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.13.0</version>
+      </plugin>
+
+      <!-- mvn clean xoá luôn kết quả lần chạy cũ — không để report trộn nhiều lần chạy -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-clean-plugin</artifactId>
+        <version>3.2.0</version>
+        <configuration>
+          <filesets>
+            <fileset>
+              <directory>${reports.dir}</directory>
+            </fileset>
+          </filesets>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>3.5.1</version>
+        <configuration>
+          <suiteXmlFiles>
+            <suiteXmlFile>testng.xml</suiteXmlFile>
+          </suiteXmlFiles>
+          <reportsDirectory>${reports.dir}/surefire</reportsDirectory>
+          <!-- Không ghi system properties (có thể chứa -DTEST_PASSWORD) vào XML report -->
+          <enablePropertiesElement>false</enablePropertiesElement>
+          <!-- AspectJ weaver bắt @Step trong Screen Object → sinh sub-step trong Allure -->
+          <argLine>-Dfile.encoding=UTF-8 -javaagent:"${settings.localRepository}/org/aspectj/aspectjweaver/${aspectj.version}/aspectjweaver-${aspectj.version}.jar"</argLine>
+          <systemPropertyVariables>
+            <allure.results.directory>${reports.dir}/allure-results</allure.results.directory>
+          </systemPropertyVariables>
+        </configuration>
+        <dependencies>
+          <dependency>
+            <groupId>org.aspectj</groupId>
+            <artifactId>aspectjweaver</artifactId>
+            <version>${aspectj.version}</version>
+          </dependency>
+        </dependencies>
+      </plugin>
+
+      <!--
+        1) Giải nén sẵn bộ Allure 2 CLI (Maven Central) vào .allure/ ở phase validate.
+        KHÔNG dựa vào cơ chế tự tải của allure-maven: nó tải từ Internet lúc chạy goal,
+        máy không mạng / sau proxy là hỏng.
+      -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <version>3.8.1</version>
+        <executions>
+          <execution>
+            <id>unpack-allure-cli</id>
+            <phase>validate</phase>
+            <goals>
+              <goal>unpack</goal>
+            </goals>
+            <configuration>
+              <artifactItems>
+                <artifactItem>
+                  <groupId>io.qameta.allure</groupId>
+                  <artifactId>allure-commandline</artifactId>
+                  <version>${allure.cli.version}</version>
+                  <type>zip</type>
+                  <outputDirectory>${allure.home}</outputDirectory>
+                </artifactItem>
+              </artifactItems>
+              <!-- Marker nằm ngoài target/ → mvn clean KHÔNG bắt giải nén lại -->
+              <markersDirectory>${allure.home}/.markers</markersDirectory>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!-- 2) Goal allure:report / allure:serve — trỏ về bộ CLI vừa giải nén, KHÔNG tải lại -->
+      <plugin>
+        <groupId>io.qameta.allure</groupId>
+        <artifactId>allure-maven</artifactId>
+        <version>2.15.2</version>
+        <configuration>
+          <reportVersion>${allure.cli.version}</reportVersion>
+          <installDirectory>${allure.home}</installDirectory>
+          <resultsDirectory>${reports.dir}/allure-results</resultsDirectory>
+          <reportDirectory>${reports.dir}/allure-report</reportDirectory>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>

@@ -1,0 +1,17 @@
+{
+  "android_emulator_5554": {
+    "platformName": "Android",
+    "appium:automationName": "UiAutomator2",
+    "appium:deviceName": "Pixel_9",
+    "appium:platformVersion": "17",
+    "appium:udid": "emulator-5554",
+    "appium:systemPort": 8201,
+    "appium:appPackage": "com.anhtester.book",
+    "appium:appActivity": ".MainActivity",
+    "appium:noReset": false,
+    "appium:autoGrantPermissions": true,
+    "appium:newCommandTimeout": 120,
+    "appium:uiautomator2ServerInstallTimeout": 120000,
+    "appium:adbExecTimeout": 60000
+  }
+}

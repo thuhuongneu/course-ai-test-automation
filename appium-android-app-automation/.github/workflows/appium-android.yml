@@ -1,0 +1,84 @@
+name: Appium Android Tests
+
+# GitHub chỉ đọc workflow trong .github/workflows ở GỐC repo. Project này nằm trong thư mục con,
+# nên muốn kích hoạt thì chép file này sang <gốc repo>/.github/workflows/ — các đường dẫn bên dưới
+# đã trỏ sẵn vào thư mục appium-android-app-automation. Xem README mục "CI/CD".
+
+on:
+  push:
+    branches: [main]
+    paths: ['appium-android-app-automation/**']
+  pull_request:
+    paths: ['appium-android-app-automation/**']
+  workflow_dispatch:
+
+env:
+  # Emulator của GitHub chưa có app như máy local — phải cài từ file APK này trước khi chạy test
+  APK_PATH: apps/book-app.apk
+
+defaults:
+  run:
+    working-directory: appium-android-app-automation
+
+jobs:
+  android:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Bật KVM cho Android emulator
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          # sdkmanager/avdmanager của runner cần Java 17; code vẫn biên dịch --release 11
+          java-version: '17'
+          cache: maven
+          cache-dependency-path: appium-android-app-automation/pom.xml
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Cài Appium và driver UiAutomator2
+        run: |
+          npm install -g appium@3
+          appium driver install uiautomator2
+
+      - name: Khởi động Appium server chạy nền
+        # log-level warn: ở mức info, Appium ghi cả nội dung gõ vào ô nhập — kể cả mật khẩu
+        run: appium --address 127.0.0.1 --port 4723 --log-level warn > "$RUNNER_TEMP/appium.log" 2>&1 &
+
+      - name: Cấp quyền chạy Maven Wrapper
+        run: chmod +x mvnw
+
+      - name: Chạy test trên emulator
+        uses: reactivecircus/android-emulator-runner@v2
+        env:
+          TEST_USERNAME: ${{ secrets.TEST_USERNAME }}
+          TEST_PASSWORD: ${{ secrets.TEST_PASSWORD }}
+        with:
+          api-level: 34
+          target: google_apis
+          arch: x86_64
+          working-directory: appium-android-app-automation
+          script: |
+            adb install -r "$APK_PATH"
+            ./mvnw -B clean test
+
+      - name: Sinh Allure report
+        if: always()
+        # CLI Allure đã được giải nén trong .allure/ ở phase validate — CI không cài Allure riêng
+        run: ./mvnw -B allure:report
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-reports
+          path: appium-android-app-automation/reports/
+          retention-days: 14

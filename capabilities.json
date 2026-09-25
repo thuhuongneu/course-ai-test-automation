@@ -1,7 +1,7 @@
 {
     "android": {
         "platformName": "Android",
-        "appium:deviceName": "Pixel_10_Pro_XL",
+        "appium:deviceName": "Pixel_9",
         "appium:automationName": "UiAutomator2",
         "appium:platformVersion": "17",
         "appium:noReset": true,

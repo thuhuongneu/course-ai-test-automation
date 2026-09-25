@@ -1,0 +1,20 @@
+# Output test — gom hết trong reports/
+reports/
+
+# Bộ Allure 2 CLI giải nén trong project (~30 MB) — mvnw validate tự giải nén lại
+.allure/
+
+# Build Maven
+target/
+
+# Tài khoản test — KHÔNG commit
+.env
+
+# Thư mục mặc định của tool (phòng khi config bị bỏ sót)
+allure-results/
+test-output/
+
+# IDE
+.idea/
+*.iml
+.vscode/
