@@ -28,6 +28,8 @@ export const env = {
   baseURL: required('BASE_URL'),
   username: required('TEST_USERNAME'),
   password: required('TEST_PASSWORD'),
+  pmEmail: required('PM_EMAIL'),
+  pmPassword: required('PM_PASSWORD'),
   headless: process.env.HEADLESS !== 'false',
   timeout: positiveInt('TIMEOUT', 90_000),
   workers: positiveInt('WORKERS', 5),
@@ -35,8 +37,16 @@ export const env = {
 
 /** Đường dẫn các trang chính của hệ thống — dùng chung cho Page Object và test. */
 export const routes = {
+  home: '/',
   login: '/admin/authentication',
+  logout: '/admin/authentication/logout',
+  dashboardPath: '/admin/',
   /** Dashboard sau khi đăng nhập; chấp nhận cả có và không có dấu / ở cuối */
   dashboard: /\/admin\/?$/,
   customers: /\/admin\/clients/,
 } as const;
+
+/** URL tuyệt đối — dùng khi TC yêu cầu thanh địa chỉ dừng ĐÚNG một địa chỉ, không bị đẩy đi đâu khác */
+export function absoluteUrl(path: string): string {
+  return new URL(path, env.baseURL).href;
+}

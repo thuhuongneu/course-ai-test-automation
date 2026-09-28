@@ -8,10 +8,15 @@ import { routes } from '../utils/env.config';
  */
 export class DashboardPage extends BasePage {
   readonly sidebarMenu: Locator;
+  /** Các mục menu cấp 1 — mỗi mục có class menu-item-<tên>; li đầu tiên là logo, không mang class này */
+  readonly menuItems: Locator;
+  readonly profileAvatar: Locator;
 
   constructor(page: Page) {
     super(page);
     this.sidebarMenu = page.locator('#side-menu');
+    this.menuItems = this.sidebarMenu.locator('> li[class*="menu-item-"]');
+    this.profileAvatar = page.locator('#header a.profile img.staff-profile-image-small');
   }
 
   /**

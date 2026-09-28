@@ -2,15 +2,15 @@
   "_ghiChu": "email = null nghĩa là dùng TEST_USERNAME trong .env. KHÔNG chép email tài khoản test vào file này - file được commit, và chép ra là có 2 nguồn sự thật.",
   "invalidLogins": [
     {
-      "testId": "CRM_LOGIN_TC_002",
-      "title": "Đăng nhập thất bại khi nhập sai mật khẩu",
+      "testId": "CRM_LOGIN_TC_013",
+      "title": "Sai thông tin đăng nhập trả về thông báo chung (biến thể a: email có thật, mật khẩu sai)",
       "email": null,
       "password": "SaiMatKhau@999",
       "expectedError": "Invalid email or password"
     },
     {
-      "testId": "CRM_LOGIN_TC_003",
-      "title": "Đăng nhập thất bại khi email không tồn tại trong hệ thống",
+      "testId": "CRM_LOGIN_TC_013",
+      "title": "Sai thông tin đăng nhập trả về thông báo chung (biến thể b: email không tồn tại)",
       "email": "khong_ton_tai@auto.test",
       "password": "BatKyMatKhau@123",
       "expectedError": "Invalid email or password"

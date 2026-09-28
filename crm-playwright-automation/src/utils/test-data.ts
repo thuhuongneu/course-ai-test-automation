@@ -23,4 +23,12 @@ export class TestData {
   static code(prefix: string): string {
     return `${prefix}_${this.suffix()}`;
   }
+
+  /** Biến thể lẫn hoa thường của một email: admin@example.com → ADMIN@Example.COM */
+  static mixedCaseEmail(email: string): string {
+    const [local, domain] = email.split('@');
+    const tldStart = domain.lastIndexOf('.');
+    return `${local.toUpperCase()}@${domain[0].toUpperCase()}${domain.slice(1, tldStart)}`
+      + domain.slice(tldStart).toUpperCase();
+  }
 }

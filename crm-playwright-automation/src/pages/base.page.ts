@@ -1,4 +1,4 @@
-import { Page, Locator, expect } from '@playwright/test';
+import { Page, Locator, Response, expect } from '@playwright/test';
 import { logger } from '../utils/logger';
 
 /**
@@ -7,11 +7,22 @@ import { logger } from '../utils/logger';
  * Toàn bộ chờ đợi dựa vào auto-waiting + web-first assertion của Playwright, không hard sleep.
  */
 export abstract class BasePage {
-  constructor(protected readonly page: Page) {}
+  /** Thẻ body — hệ thống gắn class theo trang và theo người dùng (login_admin, dashboard, user-id-N) */
+  readonly body: Locator;
 
-  async goto(path = ''): Promise<void> {
+  constructor(protected readonly page: Page) {
+    this.body = page.locator('body');
+  }
+
+  async goto(path = ''): Promise<Response | null> {
     logger.info(`Điều hướng tới: ${path}`);
-    await this.page.goto(path);
+    const response = await this.page.goto(path);
+    await this.page.waitForLoadState('domcontentloaded');
+    return response;
+  }
+
+  async reload(): Promise<void> {
+    await this.page.reload();
     await this.page.waitForLoadState('domcontentloaded');
   }
 
